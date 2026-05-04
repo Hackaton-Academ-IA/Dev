@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // SURTOUT PAS DE LIGNE URL ICI EN PRISMA 7
+}
+
+model Utilisateur {
+  id        String   @id @default(uuid())
+  pseudo    String
+  email     String   @unique
+  niveau    Int      @default(1)
+  xp        Int      @default(0)
+  reponses  Reponse[]
+  badges    UtilisateurBadge[]
+}
+
+model Question {
+  id               String    @id @default(uuid())
+  contenu          String
+  difficulte       String    
+  reponse_attendue String
+  reponses         Reponse[]
+}
+
+model Reponse {
+  id             String      @id @default(uuid())
+  est_correct    Boolean
+  temps_reponse  Int         
+  
+  utilisateurId  String
+  utilisateur    Utilisateur @relation(fields: [utilisateurId], references: [id])
+  
+  questionId     String
+  question       Question    @relation(fields: [questionId], references: [id])
+}
+
+model Badge {
+  id          String             @id @default(uuid())
+  nom         String
+  icone       String
+  xp_requis   Int
+  utilisateurs UtilisateurBadge[]
+}
+
+model UtilisateurBadge {
+  id            String      @id @default(uuid())
+  dateObtention DateTime    @default(now())
+  
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  
+  badgeId       String
+  badge         Badge       @relation(fields: [badgeId], references: [id])
+}
