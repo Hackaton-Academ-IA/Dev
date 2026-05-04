@@ -33,16 +33,21 @@ Voici les étapes pour faire tourner le projet sur votre machine :
 1. **Cloner le dépôt** :    
    git clone [https://github.com/Hackaton-Academ-IA/Dev.git](https://github.com/Hackaton-Academ-IA/Dev.git)
 
+
+Configurer les variables d'environnement :
+Copiez le fichier d'exemple pour créer votre fichier local, puis remplissez les variables manquantes (comme l'URL de la base de données ou la clé API Gemini).
+
+    cp .env.example .env
+
 Installer les dépendances :
 
-npm install
-Lancer la base de données (PostgreSQL) :
-Assurez-vous que Docker est lancé sur votre machine, puis exécutez :
+    npm install
 
 Lancer la base de données (PostgreSQL) :
 Assurez-vous que Docker Desktop est bien démarré sur votre machine, puis exécutez :
 
-docker-compose up -d
+    docker-compose up -d
+
 Démarrer le serveur de développement :
 
 npm run dev
