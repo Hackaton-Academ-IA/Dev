@@ -24,9 +24,15 @@ Pour transformer l'apprentissage en aventure, nous intégrons :
 - **Base de données :** PostgreSQL (via Docker)
 - **Tests :** Vitest
 
+## Architecture du projet
+Retrouvez tous nos schémas de conception dans le dossier `/architecture` :
+- **Flux de données :** [Voir le schéma](./architecture/architecture-flux-AcademIA.png)
+- **Modèle de données (BDD) :** [Voir le schéma](./architecture/bdd-schema-AcademIA.png)
+- **Cas d'utilisation :** [Voir le schéma](./architecture/use-case-AcademIA.png)
+
 ---
 
-## 💻 Installation en local
+## Installation en local
 
 Voici les étapes pour faire tourner le projet sur votre machine :
 
