@@ -15,7 +15,7 @@ export const auth = betterAuth({
             create: {
                 before: async (user) => {
                     const password = user.password;
-                    if (password) {
+                    if (typeof password === "string") {
                         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
                         if (!passwordRegex.test(password)) {
                             throw new APIError("BAD_REQUEST", {
