@@ -23,3 +23,27 @@ Pour transformer l'apprentissage en aventure, nous intégrons :
 - **Backend :** NextJS API / Better-Auth
 - **Base de données :** PostgreSQL (via Docker)
 - **Tests :** Vitest
+
+---
+
+## 💻 Installation en local
+
+Voici les étapes pour faire tourner le projet sur votre machine :
+
+1. **Cloner le dépôt** :    
+   git clone [https://github.com/Hackaton-Academ-IA/Dev.git](https://github.com/Hackaton-Academ-IA/Dev.git)
+
+Installer les dépendances :
+
+npm install
+Lancer la base de données (PostgreSQL) :
+Assurez-vous que Docker est lancé sur votre machine, puis exécutez :
+
+Lancer la base de données (PostgreSQL) :
+Assurez-vous que Docker Desktop est bien démarré sur votre machine, puis exécutez :
+
+docker-compose up -d
+Démarrer le serveur de développement :
+
+npm run dev
+Le projet sera alors accessible sur http://localhost:3000.
