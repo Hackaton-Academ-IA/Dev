@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import LeaderboardClient from "./LeaderboardClient";
-
+export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: "ACADEM'IA — HALL OF FAME",
   description: "Le classement des héros de la Tour Infinie d'Academ'IA.",
