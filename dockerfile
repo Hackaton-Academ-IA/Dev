@@ -1,19 +1,38 @@
-# Utilise l'image officielle Node.js
-FROM node:24-alpine
-
+# Stage 1: Install dependencies
+FROM node:24-alpine AS deps
 WORKDIR /app
-
-# Copie les fichiers de dépendances
 COPY package.json package-lock.json ./
+RUN npm ci
 
-# Installe les dépendances
-RUN npm install
-
-# Copie le reste des fichiers du projet
+# Stage 2: Build the application
+FROM node:24-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Expose le port 3000
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Build Next.js
+RUN npm run build
+
+# Stage 3: Production runner
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy necessary files
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+
 EXPOSE 3000
 
-# Lance l'application en mode développement
-CMD ["npm", "run", "dev"]
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Start the application
+CMD ["node", "server.js"]
