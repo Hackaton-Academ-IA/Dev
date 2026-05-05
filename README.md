@@ -57,4 +57,30 @@ Assurez-vous que Docker Desktop est bien démarré sur votre machine, puis exéc
 Démarrer le serveur de développement :
 
 npm run dev
-Le projet sera alors accessible sur http://localhost:3000.
+Le projet sera alors accessible sur http://localhost:3000 en local sur l'une des machines des développeurs.
+
+
+
+## Coulisses Techniques : Jalons de Développement
+
+Le projet Academ'IA suit une méthodologie itérative rigoureuse.
+
+### Jalon 2 : Structure & Discipline
+
+*   **Modularité & Organisation** : Architecture Next.js 16 avec séparation stricte :
+    *   `/src/app/api` : Logique backend isolée.
+    *   `/src/components` : UI atomique et Pixel Art CSS.
+    *   `/src/lib` : Cœur technologique (Auth, Database, Logger).
+*   **Documentation API** : Intégration de **Scalar** pour une documentation interactive et testable.
+*   **Discipline Git** : Commits atomiques réguliers (trace claire de l'évolution).
+*   **Déploiement** : Instance locale accessible sur le réseau `EXPERNET_SALLE_LA_FOURNAISE`.
+
+### Jalon 3 : Robustesse & Résilience
+
+*   **Gestion d'erreurs (Failsafe)** :
+    *   Blocs `try/catch` globaux sur les Server Actions et API.
+    *   Messages d'erreurs normalisés pour l'utilisateur (UX résiliente).
+*   **Traçabilité (Logs ISO)** : Système de logging centralisé (`src/lib/logger.ts`) capturant les actions critiques (Auth, Quiz, XP) pour audit sécurité.
+*   **Santé du Code** :
+    *   **Refactoring** : Suppression du code mort et optimisation des imports.
+*   **Automatisation** : 
