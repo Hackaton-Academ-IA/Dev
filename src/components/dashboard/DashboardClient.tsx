@@ -520,7 +520,11 @@ export default function DashboardClient({ playerName }: { playerName: string }) 
   };
 
   const handleLogout = async () => {
-    await authClient.signOut();
+    try {
+      await authClient.signOut();
+    } catch {
+      // réseau coupé pendant la déconnexion — on redirige quand même
+    }
     router.push("/login");
   };
 
