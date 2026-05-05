@@ -76,9 +76,9 @@ function RPGToast({ onClose }: { onClose: () => void }) {
           <span className="font-pixel text-[10px] text-black">⚠ SYSTÈME — ACCÈS REFUSÉ</span>
           <button onClick={onClose} className="font-pixel text-[12px] text-black/60 hover:text-black leading-none">✕</button>
         </div>
-        <div className="p-4 font-pixel text-[11px] text-black text-center leading-relaxed" style={{ textShadow: "1px 1px 0 #4d3a0066" }}>
+        <div className="p-4 font-pixel text-[11px] text-[var(--ink)] text-center leading-relaxed" style={{ textShadow: "2px 2px 0 #000" }}>
           CE MODULE SERA DISPONIBLE DANS LA VERSION BÊTA.<br />
-          XP ACTUELLE INSUFFISANTE !
+          <span className="text-[var(--danger)]">XP ACTUELLE INSUFFISANTE !</span>
         </div>
       </div>
     </div>

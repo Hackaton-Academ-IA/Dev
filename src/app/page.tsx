@@ -26,24 +26,19 @@ function DemoModal({ onClose }: { onClose: () => void }) {
           </span>
           <button onClick={onClose} className="font-pixel text-[14px] text-white/70 hover:text-white leading-none px-1">✕</button>
         </div>
-        <div className="p-6 sm:p-8 space-y-5 text-center">
-          <div
-            className="border-4 border-black bg-[#07050f] p-10 sm:p-14 flex flex-col items-center justify-center gap-3"
-            style={{ boxShadow: "inset 0 0 0 2px #2a1c5e", minHeight: "200px" }}
-          >
-            <div className="font-pixel text-[16px] glow-violet">▶ CHARGEMENT DE LA VIDÉO...</div>
-            <div className="font-mono-pixel text-[18px] text-[var(--ink-dim)]">[ Placeholder Démo Hackathon ]</div>
-            <div className="flex gap-[3px] mt-2">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-3 h-3 border-2 border-black"
-                  style={{ background: i < 7 ? "linear-gradient(180deg,#b14bff,#5a0dc9)" : "#0e0a22" }}
-                />
-              ))}
-            </div>
+        <div className="p-4 sm:p-6 space-y-4">
+          <video
+            src="/Video_demo_quiz_v1.mp4"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full aspect-video border-4 border-black bg-black"
+          />
+          <div className="text-center">
+            <button onClick={onClose} className="arcade arcade-ghost text-[10px]">✕ FERMER</button>
           </div>
-          <button onClick={onClose} className="arcade arcade-ghost text-[10px]">✕ FERMER</button>
         </div>
       </div>
     </div>
