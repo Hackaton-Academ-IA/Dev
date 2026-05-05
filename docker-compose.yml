@@ -1,5 +1,4 @@
 services:
-  # Service pour la base de données
   db:
     image: postgres:15-alpine
     restart: always
@@ -12,18 +11,24 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
-  # Service pour l'application Next.js
   web:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    # Indique à Docker de charger votre fichier .env manuel
+    env_file:
+      - .env
     environment:
+      # On reconstruit l'URL pour Prisma en utilisant les variables du .env
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       NEXT_PUBLIC_GEMINI_API_KEY: ${NEXT_PUBLIC_GEMINI_API_KEY}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+    # S'assure que la DB est prête avant de lancer l'app
+    depends_on:
+      - db
 
 volumes:
   db-data:
