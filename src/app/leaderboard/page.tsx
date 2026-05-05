@@ -30,7 +30,7 @@ export default async function LeaderboardPage() {
     pseudo: u.name ?? "Aventurier Anonyme",
     niveau: u.niveau,
     xp: u.xp,
-    xpMax: 10000,
+    xpMax: 100 * u.niveau * u.niveau,
     role: u.role as "user" | "admin",
   }));
 
@@ -63,7 +63,7 @@ export default async function LeaderboardPage() {
             pseudo: me.name ?? "Aventurier Anonyme",
             niveau: me.niveau,
             xp: me.xp,
-            xpMax: 10000,
+            xpMax: 100 * me.niveau * me.niveau,
             role: me.role as "user" | "admin",
           };
         }
@@ -71,6 +71,35 @@ export default async function LeaderboardPage() {
     }
   } catch {
     // Session absente ou erreur réseau — on affiche le leaderboard sans sticky footer
+  }
+
+  if (players.length === 0) {
+    return (
+      <div className="scanlines crt-flicker min-h-screen flex items-center justify-center p-8">
+        <div className="panel panel-violet max-w-md w-full text-center">
+          <div className="titlebar titlebar-violet">
+            <span className="font-pixel text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
+              ▣ HALL OF FAME
+            </span>
+          </div>
+          <div className="p-8 space-y-4">
+            <div className="font-pixel text-[48px]" style={{ textShadow: "3px 3px 0 #000" }}>
+              👻
+            </div>
+            <div className="font-pixel text-[11px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
+              HALL OF FAME VIDE
+            </div>
+            <p className="font-mono-pixel text-[15px] text-[var(--ink-dim)] leading-[1.5]">
+              Aucun héros n&apos;a encore osé défier la tour...<br />
+              <span className="text-white">Soyez le premier !</span>
+            </p>
+            <a href="/quizz" className="arcade arcade-emerald arcade-glow inline-block font-pixel text-[9px] mt-2">
+              ▶ COMMENCER L&apos;AVENTURE
+            </a>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -486,7 +486,7 @@ function PlayerList({ rows }: { rows: LeaderboardPlayer[] }) {
             <span className="text-[var(--gold)]">⚠</span> Aucun joueur au-delà du top 3.
           </div>
         ) : (
-          rows.map((p) => <ListRow key={p.rank} p={p} />)
+          rows.map((p) => <ListRow key={p.rank} p={p} />) 
         )}
       </div>
 

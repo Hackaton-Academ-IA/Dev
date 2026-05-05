@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { PixelBadge } from "@/components/ui/PixelIcons";
+import { xpThreshold, niveauFromTotalXp } from "@/lib/game/engine";
+
+export interface BadgeData {
+  id: string;
+  nom: string;
+  icone: string;
+  xp_requis: number;
+  obtained: boolean;
+}
 
 /* ── Question bank (fallback when no AI available) ── */
 const QUESTION_BANK = [
@@ -251,7 +260,13 @@ function PlayerProfile({ name, level, xp, xpMax, hp, hpMax, coins, streak }: {
               ))}
             </div>
             <div className="flex justify-between font-mono-pixel text-[14px] text-[var(--ink-dim)] mt-1">
-              <span>NEXT LV: <span className="text-[var(--emerald)]">{(xpMax - xp).toLocaleString()} XP</span></span>
+              <span>
+                {xpMax - xp <= 50 && xpMax - xp > 0 ? (
+                  <span className="text-[var(--gold)]">⚡ Plus que {(xpMax - xp).toLocaleString()} XP !</span>
+                ) : (
+                  <span>NEXT LV: <span className="text-[var(--emerald)]">{(xpMax - xp).toLocaleString()} XP</span></span>
+                )}
+              </span>
               <span>STREAK: <span className="text-[var(--hot-pink)]">🔥 {streak}d</span></span>
             </div>
           </div>
@@ -436,50 +451,71 @@ useEffect(() => {
 }
 
 /* ── Badge inventory ── */
-const BADGES = [
-  { kind: "book"  as const, name: "FIRST QUEST",  locked: false, isNew: false },
-  { kind: "sword" as const, name: "BOSS SLAYER",  locked: false, isNew: true  },
-  { kind: "potion"as const, name: "ALCHEMIST",    locked: false, isNew: false },
-  { kind: "crown" as const, name: "TOP 1%",       locked: false, isNew: false },
-  { kind: "atom"  as const, name: "SCIENCE PRO",  locked: false, isNew: false },
-  { kind: "heart" as const, name: "NO MISTAKES",  locked: true,  isNew: false },
-  { kind: "skull" as const, name: "NIGHT OWL",    locked: true,  isNew: false },
-  { kind: "lock"  as const, name: "???",          locked: true,  isNew: false },
-  { kind: "lock"  as const, name: "???",          locked: true,  isNew: false },
+type BadgeKind = "book" | "sword" | "potion" | "skull" | "crown" | "atom" | "lock" | "heart";
+
+const ICONE_KIND_MAP: Record<string, BadgeKind> = {
+  "📚": "book", "livre": "book", "book": "book",
+  "⚔": "sword", "⚔️": "sword", "sword": "sword", "épée": "sword",
+  "🧪": "potion", "potion": "potion", "alchimie": "potion",
+  "💀": "skull", "skull": "skull", "crâne": "skull",
+  "👑": "crown", "crown": "crown", "couronne": "crown",
+  "⚛": "atom", "⚛️": "atom", "atom": "atom", "science": "atom",
+  "❤": "heart", "❤️": "heart", "heart": "heart", "coeur": "heart",
+};
+
+function iconeToKind(icone: string): BadgeKind {
+  const key = icone.trim().toLowerCase();
+  if (ICONE_KIND_MAP[icone.trim()]) return ICONE_KIND_MAP[icone.trim()];
+  for (const [k, v] of Object.entries(ICONE_KIND_MAP)) {
+    if (key.includes(k.toLowerCase())) return v;
+  }
+  return "lock";
+}
+
+const FALLBACK_BADGES: BadgeData[] = [
+  { id: "fb-1", nom: "First Quest",   icone: "📚", xp_requis: 0,    obtained: false },
+  { id: "fb-2", nom: "Boss Slayer",   icone: "⚔️", xp_requis: 500,  obtained: false },
+  { id: "fb-3", nom: "Alchemist",     icone: "🧪", xp_requis: 1000, obtained: false },
+  { id: "fb-4", nom: "Top 1%",        icone: "👑", xp_requis: 5000, obtained: false },
+  { id: "fb-5", nom: "Science Pro",   icone: "⚛️", xp_requis: 2000, obtained: false },
+  { id: "fb-6", nom: "No Mistakes",   icone: "❤️", xp_requis: 3000, obtained: false },
+  { id: "fb-7", nom: "Night Owl",     icone: "💀", xp_requis: 4000, obtained: false },
+  { id: "fb-8", nom: "???",           icone: "🔒", xp_requis: 9999, obtained: false },
 ];
 
-function Inventory() {
-  const unlocked = BADGES.filter((b) => !b.locked).length;
+const DAILY_MAX = 5;
+
+function Inventory({ badges, dailyQuestsDone }: { badges: BadgeData[]; dailyQuestsDone: number }) {
+  const displayBadges = badges.length > 0 ? badges : FALLBACK_BADGES;
+  const obtained = displayBadges.filter((b) => b.obtained).length;
+
+  const dailyDone = Math.min(dailyQuestsDone, DAILY_MAX);
+  const dailyComplete = dailyDone >= DAILY_MAX;
+
   return (
     <aside className="panel panel-emerald">
       <div className="titlebar titlebar-emerald flex items-center justify-between">
         <div className="font-pixel text-[10px] text-black" style={{ textShadow: "1px 1px 0 #052b16" }}>
           ♦ INVENTAIRE DE BADGES
         </div>
-        <div className="font-mono-pixel text-[14px] text-black/80">{unlocked}/{BADGES.length}</div>
+        <div className="font-mono-pixel text-[14px] text-black/80">{obtained}/{displayBadges.length}</div>
       </div>
       <div className="p-4 sm:p-5">
-        <div className="grid grid-cols-3 gap-3">
-          {BADGES.map((b, i) => (
-            <div key={i}
-                 className={`relative flex flex-col items-center gap-2 p-3 border-4 border-black ${b.locked ? "bg-[#0e0a22]" : "bg-[#0b1a13]"}`}
-                 style={{ boxShadow: b.locked ? "inset 0 0 0 2px #1a1233, 0 4px 0 #000" : "inset 0 0 0 2px #0d8f4a, 0 4px 0 #000" }}>
-              <div style={{ filter: b.locked ? "grayscale(1) brightness(0.5)" : "none" }}>
-                <PixelBadge kind={b.kind} size={44} />
+        <div className="grid grid-cols-4 gap-2">
+          {displayBadges.map((b) => (
+            <div key={b.id}
+                 className={`relative flex flex-col items-center gap-1 p-2 border-4 border-black ${b.obtained ? "bg-[#0b1a13]" : "bg-[#0e0a22]"}`}
+                 style={{ boxShadow: b.obtained ? "inset 0 0 0 2px #0d8f4a, 0 4px 0 #000" : "inset 0 0 0 2px #1a1233, 0 4px 0 #000" }}>
+              <div style={{ filter: b.obtained ? "none" : "grayscale(1) brightness(0.35) opacity(0.7)" }}>
+                <PixelBadge kind={iconeToKind(b.icone)} size={36} />
               </div>
-              <div className="font-pixel text-[8px] text-center leading-[1.6]"
-                   style={{ color: b.locked ? "var(--ink-dim)" : "#dfffe9", textShadow: "1px 1px 0 #000" }}>
-                {b.locked ? "?????" : b.name}
+              <div className="font-pixel text-[7px] text-center leading-[1.5] w-full truncate"
+                   style={{ color: b.obtained ? "#dfffe9" : "var(--ink-dim)", textShadow: "1px 1px 0 #000" }}>
+                {b.obtained ? b.nom.toUpperCase() : "?????"}
               </div>
-              {b.isNew && !b.locked && (
-                <div className="absolute -top-2 -right-2 font-pixel text-[8px] px-2 py-1 bg-[var(--hot-pink)] border-2 border-black"
-                     style={{ color: "#fff", textShadow: "1px 1px 0 #000" }}>
-                  NEW!
-                </div>
-              )}
-              {b.locked && (
-                <div className="absolute top-1 right-1">
-                  <PixelBadge kind="lock" size={22} />
+              {!b.obtained && (
+                <div className="absolute top-0.5 right-0.5">
+                  <PixelBadge kind="lock" size={16} />
                 </div>
               )}
             </div>
@@ -488,28 +524,70 @@ function Inventory() {
 
         <div className="pix-div mt-5 mb-4" />
 
-        <div className="font-pixel text-[10px] text-[var(--emerald)] mb-2">⚔ DAILY QUESTS</div>
-        <ul className="space-y-2 font-mono-pixel text-[16px]">
-          {[
-            { label: "Réussir 3 quêtes d'affilée", done: true,  reward: "+30 XP"    },
-            { label: "Battre le boss «Algèbre»",   done: false, reward: "+1 BADGE"  },
-            { label: "Étudier 15 min",             done: false, reward: "+15 ◎"     },
-          ].map((q, i) => (
-            <li key={i} className="flex items-center justify-between gap-3 px-3 py-2 border-2 border-black bg-[#0a0720]">
-              <div className="flex items-center gap-3">
-                <span className={`w-4 h-4 border-2 border-black ${q.done ? "bg-[var(--emerald)]" : "bg-[#1a1233]"}`} />
-                <span className={q.done ? "line-through text-[var(--ink-dim)]" : ""}>{q.label}</span>
-              </div>
-              <span className="font-pixel text-[8px] text-[var(--gold)]">{q.reward}</span>
-            </li>
-          ))}
-        </ul>
+        {/* Daily quest section */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-pixel text-[10px] text-[var(--emerald)]">⚔ DÉFI DE L&apos;IA</div>
+          <div className="font-pixel text-[10px] text-[var(--gold)]">QUÊTE {dailyDone}/{DAILY_MAX}</div>
+        </div>
 
-        <button className="arcade arcade-gold text-[10px] w-full mt-5">
-          ◆ OUVRIR LE COFFRE
-        </button>
+        {/* Progress blocks */}
+        <div className="flex gap-1.5 mb-3">
+          {Array.from({ length: DAILY_MAX }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 h-3 border-2 border-black"
+              style={{
+                background: i < dailyDone ? "var(--emerald)" : "#0a0720",
+                boxShadow: i < dailyDone ? "0 0 6px var(--emerald)" : "none",
+              }}
+            />
+          ))}
+        </div>
+
+        {dailyComplete ? (
+          <div className="px-3 py-3 border-2 border-black bg-[#0a0720] font-mono-pixel text-[16px]">
+            <span className="text-[var(--emerald)]">✔ DÉFI COMPLÉTÉ</span>
+            <span className="text-[var(--ink-dim)]"> — +200 XP gagnés !</span>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] leading-snug px-1">
+              {dailyDone === 0
+                ? "Un nouveau défi t'attend — prouve ta valeur !"
+                : `Encore ${DAILY_MAX - dailyDone} question${DAILY_MAX - dailyDone > 1 ? "s" : ""} pour décrocher +200 XP !`}
+            </div>
+            <Link href="/quizz" className="arcade arcade-blue text-[10px] w-full flex items-center justify-center gap-2">
+              ▶ RELEVER LE DÉFI
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
+  );
+}
+
+/* ── Adventure banner ── */
+function AdventureBanner() {
+  return (
+    <section className="panel panel-violet">
+      <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-5">
+        <div>
+          <div className="font-pixel text-[14px] sm:text-[18px] glow-violet leading-snug" style={{ textShadow: "2px 2px 0 #000, 0 0 8px var(--neon-violet)" }}>
+            ✦ COMMENCER VOTRE NOUVELLE AVENTURE
+          </div>
+          <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-2">
+            Affrontez des quiz, montez de niveau, gagnez des badges.
+          </div>
+        </div>
+        <Link
+          href="/quizz"
+          className="arcade arcade-gold text-[11px] whitespace-nowrap flex items-center gap-2"
+          style={{ boxShadow: "0 6px 0 #000, inset 0 -4px 0 rgba(0,0,0,.35), 0 0 16px var(--gold)" }}
+        >
+          ▶ LANCER LE QUIZ
+        </Link>
+      </div>
+    </section>
   );
 }
 
@@ -537,19 +615,33 @@ function LogoutOverlay({ onCancel, onConfirm }: { onCancel: () => void; onConfir
 }
 
 /* ── Root dashboard client ── */
-export default function DashboardClient({ playerName, isAdmin }: { playerName: string; isAdmin?: boolean }) {
+interface DashboardClientProps {
+  playerName: string;
+  isAdmin?: boolean;
+  niveau: number;
+  xp: number;
+  hp: number;
+  pieces: number;
+  lastDailyAt: string | null;
+  dailyQuestsDone: number;
+  badges: BadgeData[];
+}
+
+export default function DashboardClient({ playerName, isAdmin, niveau, xp: initXp, hp: initHp, pieces, lastDailyAt, dailyQuestsDone, badges }: DashboardClientProps) {
   const router = useRouter();
-  const [xp, setXp] = useState(7320);
-  const xpMax = 10000;
-  const [hp, setHp] = useState(4);
+  const [totalXp, setTotalXp] = useState(initXp);
+  const [hp, setHp] = useState(initHp);
   const hpMax = 5;
-  const [coins, setCoins] = useState(1240);
-  const streak = 7;
-  const level = 14;
+  const [coins, setCoins] = useState(pieces);
+  const streak = 0;
+  const level = niveau;
   const [confirmLogout, setConfirmLogout] = useState(false);
 
-  const onAward = ({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {  
-    if (dx) setXp((v) => Math.min(xpMax, v + dx));
+  const { xpInLevel } = niveauFromTotalXp(totalXp);
+  const xpSeuil = xpThreshold(niveau);
+
+  const onAward = ({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {
+    if (dx) setTotalXp((v) => v + dx);
     if (dc) setCoins((v) => v + dc);
     if (dh) setHp((v) => Math.max(0, Math.min(hpMax, v + dh)));
   };
@@ -576,7 +668,7 @@ export default function DashboardClient({ playerName, isAdmin }: { playerName: s
       <PlayerProfile
         name={playerName}
         level={level}
-        xp={xp} xpMax={xpMax}
+        xp={xpInLevel} xpMax={xpSeuil}
         hp={hp} hpMax={hpMax}
         coins={coins}
         streak={streak}
@@ -584,8 +676,10 @@ export default function DashboardClient({ playerName, isAdmin }: { playerName: s
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-5">
         <AIChallenge onAward={onAward} />
-        <Inventory />
+        <Inventory badges={badges} dailyQuestsDone={dailyQuestsDone} />
       </div>
+
+      <AdventureBanner />
 
       <footer className="panel mt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 font-mono-pixel text-[14px] text-[var(--ink-dim)]">

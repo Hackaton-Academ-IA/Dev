@@ -89,7 +89,7 @@ export default function LoginForm() {
               {/* Email */}
               <div>
                 <label className="field-label">
-                  <span className="w-2 h-2 bg-[var(--emerald)]" /> PSEUDO / EMAIL
+                  <span className="w-2 h-2 bg-[var(--emerald)]" /> EMAIL
                 </label>
                 <div className="relative">
                   <span className="field-icon"><UserIcon /></span>

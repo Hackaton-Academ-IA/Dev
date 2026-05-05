@@ -9,7 +9,15 @@
       "Bash(node -e ' *)",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);console.log\\(d\\)\")",
       "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\('tsconfig.json','utf8'\\)\\)\")",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(npx prisma *)",
+      "Bash(Get-ChildItem -Path . -Recurse -Directory -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(ls src/app/quiz/)",
+      "Bash(ls src/app/quizz/)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k: d.get\\(k\\) for k in ['scripts','prisma','dependencies']}, indent=2\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

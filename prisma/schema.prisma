@@ -24,14 +24,30 @@ model Utilisateur {
   banExpires    DateTime?
   niveau        Int       @default(1)
   xp            Int       @default(0)
-  role          Role      @default(user)
+  hp            Int       @default(5)
+  pieces        Int       @default(0)
+  lastDailyAt       DateTime?
+  dailyQuestsDone   Int       @default(0)
+  role              Role      @default(user)
   sessions      Session[]
   accounts      Account[]
   reponses      Reponse[]
-  badges        UtilisateurBadge[]
-  historique    HistoriqueQuiz[]
+  badges             UtilisateurBadge[]
+  historique         HistoriqueQuiz[]
+  donjonProgressions DonjonProgression[]
 
   @@map("user")
+}
+
+model DonjonProgression {
+  id       String      @id @default(uuid())
+  userId   String
+  donjonId Int
+  status   String      @default("LOCKED")
+  user     Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, donjonId])
+  @@map("donjon_progression")
 }
 
 model Session {
@@ -83,6 +99,9 @@ model Question {
   contenu          String
   difficulte       String
   reponse_attendue String
+  matiere          String    @default("Culture Générale")
+  choix            String[]
+  explication      String    @default("")
   reponses         Reponse[]
 }
 
