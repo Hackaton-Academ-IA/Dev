@@ -3,22 +3,34 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: LoginInput) => {
     setLoading(true);
     setError("");
 
-    const { data, error } = await authClient.signIn.email({
-      email,
-      password,
+    await authClient.signIn.email({
+      email: values.email,
+      password: values.password,
     }, {
       onRequest: () => setLoading(true),
       onResponse: () => setLoading(false),
@@ -44,7 +56,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label 
               htmlFor="email" 
@@ -56,11 +68,12 @@ export default function LoginPage() {
               id="email"
               type="email"
               placeholder="nom@exemple.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -75,11 +88,12 @@ export default function LoginPage() {
             <input
               id="password"
               type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
               className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {errors.password && (
+              <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
+            )}
           </div>
 
           {error && (
@@ -112,3 +126,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -3,31 +3,36 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signupSchema, type SignupInput } from "@/lib/validations/auth";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (values: SignupInput) => {
     setLoading(true);
     setError("");
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      setError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.");
-      setLoading(false);
-      return;
-    }
-
     await authClient.signUp.email({
-      email,
-      password,
-      name,
+      email: values.email,
+      password: values.password,
+      name: values.name,
     }, {
       onRequest: () => setLoading(true),
       onResponse: () => setLoading(false),
@@ -53,7 +58,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSignup} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label 
               htmlFor="name" 
@@ -65,11 +70,12 @@ export default function SignupPage() {
               id="name"
               type="text"
               placeholder="Jean Dupont"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register("name")}
               className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {errors.name && (
+              <p className="text-xs text-red-500 font-medium">{errors.name.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -83,11 +89,12 @@ export default function SignupPage() {
               id="email"
               type="email"
               placeholder="nom@exemple.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
               className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {errors.email && (
+              <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -100,11 +107,12 @@ export default function SignupPage() {
             <input
               id="password"
               type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
               className="flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-transparent px-3 py-2 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {errors.password && (
+              <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>
+            )}
           </div>
 
           {error && (
@@ -137,3 +145,4 @@ export default function SignupPage() {
     </div>
   );
 }
+
