@@ -37,7 +37,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
+          password: ${{ secrets.SSH_KEY }}
           envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,NEXT_PUBLIC_GEMINI_API_KEY,BETTER_AUTH_SECRET,BETTER_AUTH_URL,target_dir
           script: |
             cd $target_dir
