@@ -1,78 +1,130 @@
 "use client";
 
-import Image from "next/image";
-import { authClient } from "@/lib/auth-client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import NavBar from "@/components/landing/NavBar";
+import Hero from "@/components/landing/Hero";
+import ConceptSection from "@/components/landing/ConceptSection";
+import CiblesSection from "@/components/landing/CiblesSection";
+import TarifsSection from "@/components/landing/TarifsSection";
+import LandingFooter from "@/components/landing/LandingFooter";
 
-export default function Home() {
-  const { data: session, isPending } = authClient.useSession();
-  const router = useRouter();
+type ModalKind = "demo" | "guild" | null;
 
-  const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.refresh();
-        },
-      },
-    });
-  };
+function DemoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="panel panel-violet w-full max-w-[620px]"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="titlebar titlebar-violet flex items-center justify-between">
+          <span className="font-pixel text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
+            ▶ DÉMO · ACADEM&apos;IA — WORLD 1-1
+          </span>
+          <button onClick={onClose} className="font-pixel text-[14px] text-white/70 hover:text-white leading-none px-1">✕</button>
+        </div>
+        <div className="p-4 sm:p-6 space-y-4">
+          <video
+            src="/Video_demo_quiz_v1.mp4"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full aspect-video border-4 border-black bg-black"
+          />
+          <div className="text-center">
+            <button onClick={onClose} className="arcade arcade-ghost text-[10px]">✕ FERMER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GuildModal({ onClose }: { onClose: () => void }) {
+  const [org, setOrg] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  // TODO: implémente la logique d'envoi ici (5-10 lignes)
+  // Reçoit : org, email, message
+  // Options : fetch vers une API route, mailto:, ou console.log pour le hackathon
+  // Pense à : validation basique, feedback visuel après envoi, fermer la modale
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // ta logique ici
+  }
+
+  const inputCls = "w-full bg-[#07050f] border-4 border-black p-3 font-mono-pixel text-[16px] text-white placeholder:text-[var(--ink-dim)] focus:outline-none focus:border-[var(--elec-blue)]";
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black min-h-screen">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left mt-8">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            {isPending ? (
-              "Chargement..."
-            ) : session ? (
-              `Bienvenue, ${session.user.name} !`
-            ) : (
-              "Authentification avec Better Auth"
-            )}
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            {session 
-              ? `Vous êtes connecté en tant que ${session.user.email}.`
-              : "Connectez-vous ou créez un compte pour accéder aux fonctionnalités sécurisées."}
+    <div
+      className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="panel panel-blue w-full max-w-[540px]"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="titlebar titlebar-blue flex items-center justify-between">
+          <span className="font-pixel text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
+            ◆ CONTACTER LE MAÎTRE DE GUILDE
+          </span>
+          <button onClick={onClose} className="font-pixel text-[14px] text-white/70 hover:text-white leading-none px-1">✕</button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-3">
+          <p className="font-mono-pixel text-[18px] text-[var(--ink-dim)] leading-snug">
+            <span className="text-[var(--elec-blue)]">&gt; </span>
+            Votre missive sera transmise dans les 48h. Onboarding sans engagement.
           </p>
-        </div>
-
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row mt-8">
-          {session ? (
-            <button
-              onClick={handleLogout}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-zinc-950 text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 md:w-[158px]"
-            >
-              Se déconnecter
+          <input
+            value={org} onChange={e => setOrg(e.target.value)}
+            placeholder="Votre organisation / guilde"
+            className={inputCls}
+          />
+          <input
+            type="email"
+            value={email} onChange={e => setEmail(e.target.value)}
+            placeholder="Email du Maître de Guilde"
+            className={inputCls}
+          />
+          <textarea
+            value={message} onChange={e => setMessage(e.target.value)}
+            placeholder="Décrivez votre quête (nombre d'apprenants, objectifs…)"
+            className={`${inputCls} h-28 resize-none`}
+          />
+          <div className="flex gap-3 pt-1">
+            <button type="submit" className="arcade arcade-blue text-[10px] flex-1">
+              ⚔ ENVOYER LA MISSIVE
             </button>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-zinc-950 text-zinc-50 transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 md:w-[158px]"
-              >
-                Connexion
-              </Link>
-              <Link
-                href="/signup"
-                className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-              >
-                S'inscrire
-              </Link>
-            </>
-          )}
-        </div>
-      </main>
+            <button type="button" onClick={onClose} className="arcade arcade-ghost text-[10px]">
+              ✕ ANNULER
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export default function LandingPage() {
+  const [modal, setModal] = useState<ModalKind>(null);
+
+  return (
+    <div className="scanlines max-w-[1280px] mx-auto p-4 sm:p-6 space-y-5">
+      <NavBar />
+      <Hero onDemoClick={() => setModal("demo")} />
+      <ConceptSection />
+      <CiblesSection onGuildDemoClick={() => setModal("guild")} />
+      <TarifsSection onGuildContact={() => setModal("guild")} />
+      <LandingFooter />
+
+      {modal === "demo"  && <DemoModal  onClose={() => setModal(null)} />}
+      {modal === "guild" && <GuildModal onClose={() => setModal(null)} />}
     </div>
   );
 }

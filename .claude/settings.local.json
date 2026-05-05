@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash *)",
+      "PowerShell(New-Item *)",
+      "Bash(node -e \"const pkg = require\\('./node_modules/next/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(npx prisma *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const p=require\\('./node_modules/better-auth/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(node *)",
+      "Bash(npx @better-auth/cli migrate)"
+    ]
+  }
+}

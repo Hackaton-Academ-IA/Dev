@@ -4,7 +4,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // SURTOUT PAS DE LIGNE URL ICI EN PRISMA 7
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 model Utilisateur {
@@ -13,8 +17,10 @@ model Utilisateur {
   email     String   @unique
   niveau    Int      @default(1)
   xp        Int      @default(0)
+  role      Role     @default(USER)
   reponses  Reponse[]
   badges    UtilisateurBadge[]
+  historique HistoriqueQuiz[]
 }
 
 model Question {
@@ -48,10 +54,21 @@ model Badge {
 model UtilisateurBadge {
   id            String      @id @default(uuid())
   dateObtention DateTime    @default(now())
-  
+
   utilisateurId String
   utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
-  
+
   badgeId       String
   badge         Badge       @relation(fields: [badgeId], references: [id])
+}
+
+model HistoriqueQuiz {
+  id            String      @id @default(uuid())
+  score         Int
+  nbQuestions   Int
+  difficulte    String
+  datePassage   DateTime    @default(now())
+
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
 }
