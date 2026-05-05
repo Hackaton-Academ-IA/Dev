@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
 import { Pool } from "pg";
 import { APIError } from "better-auth/api";
 import { logger } from "@/lib/logger";
@@ -11,6 +12,12 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
   },
+  plugins: [
+    admin({
+      defaultRole: "user",
+      adminRoles: ["admin"],
+    }),
+  ],
   socialProviders: {
     google: {
       clientId:     process.env.GOOGLE_CLIENT_ID     as string,

@@ -66,6 +66,7 @@ function Sparkles({ trigger }: { trigger: number }) {
 
   useEffect(() => {
     if (!trigger) return;
+    
     const colors = ["#ffd23a", "#1eea7c", "#22a7ff", "#b14bff", "#fff"];
     const items: SparkBurst[] = Array.from({ length: 14 }).map((_, i) => ({
       id: `${trigger}-${i}`,
@@ -74,9 +75,19 @@ function Sparkles({ trigger }: { trigger: number }) {
       dx: (Math.random() * 120 - 60) + "px",
       color: colors[i % 5],
     }));
-    setBursts(items);
-    const t = setTimeout(() => setBursts([]), 1000);
-    return () => clearTimeout(t);
+
+    let t2: NodeJS.Timeout;
+
+    const t1 = setTimeout(() => {
+      setBursts(items);
+      // Disparition après 1 seconde
+      t2 = setTimeout(() => setBursts([]), 1000);
+    }, 0);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2); 
+    };
   }, [trigger]);
 
   return (
@@ -271,21 +282,29 @@ function AIChallenge({ onAward }: { onAward: (award: AwardPayload) => void }) {
   const [sparkleKey, setSparkleKey] = useState(0);
   const typingRef = useRef(0);
 
-  useEffect(() => {
-    setTyped("");
-    typingRef.current = 0;
-    let cancelled = false;
-    const tick = () => {
-      if (cancelled) return;
-      typingRef.current += 1;
-      setTyped(question.q.slice(0, typingRef.current));
-      if (typingRef.current < question.q.length) {
-        setTimeout(tick, 18);
-      }
-    };
-    tick();
-    return () => { cancelled = true; };
-  }, [question]);
+useEffect(() => {
+  typingRef.current = 0;
+  let cancelled = false;
+  
+  const tick = () => {
+    if (cancelled) return;
+    typingRef.current += 1;
+    setTyped(question.q.slice(0, typingRef.current));
+    if (typingRef.current < question.q.length) {
+      setTimeout(tick, 18);
+    }
+  };
+
+  // On décale l'initialisation pour éviter le rendu en cascade
+  setTimeout(() => {
+    if (!cancelled) {
+      setTyped("");
+      tick();
+    }
+  }, 0);
+
+  return () => { cancelled = true; };
+}, [question]);
 
   const fetchNew = () => {
     setPicked(null);
@@ -513,7 +532,7 @@ export default function DashboardClient({ playerName }: { playerName: string }) 
   const level = 14;
   const [confirmLogout, setConfirmLogout] = useState(false);
 
-  const onAward = ({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {
+  const onAward = ({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {  
     if (dx) setXp((v) => Math.min(xpMax, v + dx));
     if (dc) setCoins((v) => v + dc);
     if (dh) setHp((v) => Math.max(0, Math.min(hpMax, v + dh)));

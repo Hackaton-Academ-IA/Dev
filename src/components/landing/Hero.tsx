@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Tower from "./Tower";
 
 export default function Hero({ onDemoClick }: { onDemoClick: () => void }) {
   return (
@@ -43,7 +42,6 @@ export default function Hero({ onDemoClick }: { onDemoClick: () => void }) {
           </div>
         </div>
       </div>
-      <Tower />
     </section>
   );
 }

@@ -60,7 +60,7 @@ export default function NavBar() {
               <Link href="/login" className="arcade arcade-ghost text-[9px] hidden sm:inline-flex">
                 ▷ CONNEXION
               </Link>
-              <button className="arcade arcade-emerald text-[9px] sm:text-[10px]" onClick={() => router.push("/login")}>
+              <button className="arcade arcade-emerald text-[9px] sm:text-[10px]" onClick={() => router.push("/signup")}>
                 ▶ DÉMARRER
               </button>
             </>

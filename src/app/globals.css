@@ -66,6 +66,9 @@
 
 /* ─── Keyframes ──────────────────────────────────────────── */
 @keyframes flicker      { 0%,100%{opacity:1} 50%{opacity:0.97} }
+@keyframes neonFlicker  { 0%,18%,22%,25%,53%,57%,100%{opacity:1} 20%,24%,55%{opacity:.55} }
+@keyframes modalIn      { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+@keyframes warnBlink    { 0%,100%{opacity:1} 50%{opacity:0.4} }
 @keyframes blink        { 50%{opacity:0} }
 @keyframes coinPulse    { 0%,100%{transform:translate(0,0)} 50%{transform:translate(0,-3px)} }
 @keyframes neonPulse    {
@@ -371,4 +374,80 @@
     box-shadow: 0 0 0 2px #000; animation: sparkle-up .9s ease-out forwards;
   }
   .coin-spin { animation: coinSpin 2s linear infinite; transform-style: preserve-3d; }
+
+  /* ── Admin console additions ── */
+  .panel-danger  { box-shadow: inset 0 0 0 2px #4a0a1c, 0 0 0 2px var(--danger), 0 6px 0 0 #000, 0 0 0 6px #000; }
+  .titlebar-danger { background: repeating-linear-gradient(90deg, #c91f3d 0 6px, #8a1129 6px 12px); }
+  .arcade-danger { background: var(--danger); color: #fff; text-shadow: 2px 2px 0 #000; }
+  .chip-ghost    { background: #0d0a1a; color: var(--ink-dim); }
+  .chip-danger   { background: var(--danger); color: #fff; text-shadow: 1px 1px 0 #000; }
+  .glow-danger   { color: #fff; text-shadow: 2px 2px 0 #000, 0 0 10px var(--danger); }
+
+  .neon-red-violet {
+    color: #fff;
+    text-shadow: 2px 2px 0 #000, 0 0 6px #ff2d55, 0 0 14px #ff2d55, 0 0 24px #b14bff, 0 0 42px #b14bff;
+  }
+  .neon-flicker { animation: neonFlicker 5s infinite; }
+  .modal-pop    { animation: modalIn .14s steps(3,end) both; }
+  .warn-blink   { animation: warnBlink 0.8s steps(2,end) infinite; }
+
+  /* Player inventory table */
+  .inv-row {
+    display: grid;
+    grid-template-columns: 56px 1.3fr 1.6fr 0.8fr 0.8fr 1fr;
+    align-items: center; gap: 12px; padding: 10px 12px;
+    background: #0a0720;
+    border-top: 3px solid #000; border-bottom: 3px solid #000;
+    margin-bottom: -3px;
+  }
+  .inv-row:hover { background: #11093a; }
+  .inv-head {
+    display: grid;
+    grid-template-columns: 56px 1.3fr 1.6fr 0.8fr 0.8fr 1fr;
+    gap: 12px; padding: 10px 12px;
+    background: #1a1233; border-bottom: 4px solid #000;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.3);
+  }
+  .avatar-frame {
+    width: 48px; height: 48px;
+    border: 3px solid #000; background: #0e0a22;
+    box-shadow: inset 0 0 0 2px #2a1c5e;
+  }
+
+  /* Mini icon button */
+  .icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px;
+    border: 3px solid #000; background: #0d0a1a;
+    box-shadow: 0 4px 0 #000, inset 0 0 0 2px #2a1c5e;
+    cursor: pointer;
+    transition: transform .04s linear, box-shadow .08s linear, background .08s linear;
+  }
+  .icon-btn:hover  { background: #160d33; }
+  .icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000, inset 0 0 0 2px #2a1c5e; }
+  .icon-btn.danger { background: var(--danger); box-shadow: 0 4px 0 #000, inset 0 -3px 0 rgba(0,0,0,.4); }
+  .icon-btn.danger:hover { filter: brightness(1.1); }
+
+  /* Sidebar nav link */
+  .nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border: 3px solid #000;
+    background: #0d0a1a;
+    box-shadow: inset 0 0 0 2px #1a1233, 0 4px 0 #000;
+    color: var(--ink-dim); font-family: var(--font-pixel); font-size: 10px;
+    cursor: pointer; transition: background .1s, color .1s, box-shadow .1s;
+    width: 100%;
+  }
+  .nav-link:hover { background: #160d33; color: #fff; box-shadow: inset 0 0 0 2px var(--neon-violet), 0 4px 0 #000; }
+  .nav-link.active {
+    background: var(--neon-violet); color: #fff; text-shadow: 2px 2px 0 #000;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,.35), 0 4px 0 #000, 0 0 18px rgba(177,75,255,.5);
+  }
+
+  /* RPG confirmation modal */
+  .rpg-modal {
+    background: #000; border: 4px solid #fff;
+    box-shadow: inset 0 0 0 4px #000, inset 0 0 0 8px #fff, 0 8px 0 #000;
+    position: relative;
+  }
 }

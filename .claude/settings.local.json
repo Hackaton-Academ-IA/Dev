@@ -6,13 +6,9 @@
       "Bash(node -e \"const pkg = require\\('./node_modules/next/package.json'\\); console.log\\(pkg.version\\)\")",
       "Bash(npx tsc *)",
       "Bash(npx next *)",
-      "Bash(npx prisma *)",
       "Bash(node -e ' *)",
-      "Bash(node -e \"const p=require\\('./node_modules/better-auth/package.json'\\); console.log\\(p.version\\)\")",
-      "Bash(node *)",
-      "Bash(npx @better-auth/cli migrate)",
-      "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);console.log\\(d\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\('tsconfig.json','utf8'\\)\\)\")"
     ]
   }
 }
