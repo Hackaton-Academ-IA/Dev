@@ -83,6 +83,6 @@ Le projet Academ'IA suit une méthodologie itérative rigoureuse.
 *   **Traçabilité (Logs ISO)** : Système de logging centralisé (`src/lib/logger.ts`) capturant les actions critiques (Auth, Quiz, XP) pour audit sécurité.
 *   **Santé du Code** :
     *   **Refactoring** : Suppression du code mort et optimisation des imports.
-*   **Automatisation** :  Les tests sont réalisés avec Vitest pour garantir la stabilité des fonctionnalités critiques (Auth, Quiz, XP). Les test sont automatisés grâce à un GitHub Actions. Pour les effectuer, utilisez la commande :
+*   **Automatisation** : Les tests sont réalisés avec **Vitest** pour garantir la stabilité des fonctionnalités critiques (Auth, Quiz, XP). Les test sont automatisés grâce à un GitHub Actions. Pour les effectuer, utilisez la commande :
 
     npm run test
