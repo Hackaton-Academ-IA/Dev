@@ -13,8 +13,8 @@ jobs:
       - name: Deploy with Docker Compose
         env:
           # On mappe les secrets GitHub aux variables du docker-compose
-          postgres_user: ${{ secrets.POSTGRES_USER }}
-          postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
-          postgres_db: ${{ secrets.POSTGRES_DB }}
+          postgres_user: ${{ vars.POSTGRES_USER }}
+          postgres_password: ${{ vars.POSTGRES_PASSWORD }}
+          postgres_db: ${{ vars.POSTGRES_DB }}
         run: |
           docker-compose up -d --build
