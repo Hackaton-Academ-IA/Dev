@@ -1,20 +1,14 @@
 /**
- * Seed: 70 questions (10 par matière × 7 matières)
+ * Seed: 70 questions, Badges et Utilisateur Admin
  * Usage: npx tsx prisma/seed.ts
- *        ou: npx prisma db seed   (après avoir configuré package.json)
  */
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-
-// Charger .env.local si disponible
-try {
-  const { config } = await import("dotenv");
-  config({ path: ".env.local" });
-} catch { /* env déjà injectées */ }
+import "dotenv/config";
 
 if (!process.env.DATABASE_URL) {
-  console.error("❌  DATABASE_URL manquante.");
+  console.error("❌ DATABASE_URL manquante dans le fichier .env");
   process.exit(1);
 }
 
@@ -120,9 +114,52 @@ const QUESTIONS: QuestionSeed[] = [
 ];
 
 async function main() {
-  console.log(`🌱  Début du seed — ${QUESTIONS.length} questions à insérer...`);
+  console.log(`🌱 Démarrage du seeding...`);
 
-  // Supprimer les anciennes questions pour éviter les doublons sur re-run
+  // 1. Création des Badges
+  const badgesData = [
+    { nom: 'Novice', icone: '🥚', xp_requis: 0 },
+    { nom: 'Apprenti', icone: '🐣', xp_requis: 100 },
+    { nom: 'Éclaireur', icone: '🐥', xp_requis: 500 },
+    { nom: 'Expert', icone: '🐔', xp_requis: 1500 },
+    { nom: 'Maître de l\'IA', icone: '👑', xp_requis: 5000 },
+  ];
+
+  console.log('Création des badges...');
+  for (const badge of badgesData) {
+    const existing = await prisma.badge.findFirst({ where: { nom: badge.nom } });
+    if (!existing) {
+      await prisma.badge.create({ data: badge });
+      console.log(`Badge créé : ${badge.nom}`);
+    } else {
+      console.log(`Badge déjà existant : ${badge.nom}`);
+    }
+  }
+
+  // 2. Création de l'utilisateur admin
+  console.log('Création de l\'utilisateur admin...');
+  const adminEmail = 'admin@academia.fr';
+  const existingAdmin = await prisma.utilisateur.findUnique({ where: { email: adminEmail } });
+  
+  if (!existingAdmin) {
+    await prisma.utilisateur.create({ 
+      data: {
+      email: adminEmail,
+      pseudo: 'Administrateur AcademIA',
+      role: 'ADMIN',
+      niveau: 10,
+      xp: 10000,
+      emailVerified: true, // Vérifie aussi que ce n'est pas "emailVerifie" au passage !
+    }
+    });
+    console.log(`Admin créé : ${adminEmail}`);
+  } else {
+    console.log(`Admin déjà existant : ${adminEmail}`);
+  }
+
+  // 3. Insertion des 70 questions
+  console.log(`\nInsertion de ${QUESTIONS.length} questions MCQ...`);
+  // Supprimer les anciennes questions pour éviter les doublons ou conflits de schéma
   await prisma.question.deleteMany({});
 
   const created = await prisma.question.createMany({
@@ -130,9 +167,15 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log(`✅  ${created.count} questions insérées avec succès.`);
+  console.log(`✅ ${created.count} questions insérées avec succès.`);
+  console.log('✅ Seeding terminé avec succès !');
 }
 
 main()
-  .catch((e) => { console.error("❌  Seed échoué :", e); process.exit(1); })
-  .finally(() => prisma.$disconnect());
+  .catch((e) => {
+    console.error('❌ Erreur lors du seeding :', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
