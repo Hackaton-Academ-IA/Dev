@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${pressStart2P.variable} ${vt323.variable}`}>
+    <html lang="fr" className={`${pressStart2P.variable} ${vt323.variable}`} suppressHydrationWarning>
       <body className="crt-flicker">{children}</body>
     </html>
   );

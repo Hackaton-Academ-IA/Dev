@@ -21,10 +21,11 @@ export default async function DashboardPage() {
   logger.info("DASHBOARD_ACCESS", "Accès dashboard autorisé", session.user.id);
 
   const playerName = session.user.name ?? session.user.email ?? "SCHOLAR";
+  const role = (session.user as { role?: string }).role;
 
   return (
     <div className="scanlines crt-flicker min-h-screen">
-      <DashboardClient playerName={playerName} />
+      <DashboardClient playerName={playerName} isAdmin={role === "admin"} />
     </div>
   );
 }

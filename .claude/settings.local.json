@@ -8,7 +8,8 @@
       "Bash(npx next *)",
       "Bash(node -e ' *)",
       "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\);console.log\\(d\\)\")",
-      "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\('tsconfig.json','utf8'\\)\\)\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);console.log\\(fs.readFileSync\\('tsconfig.json','utf8'\\)\\)\")",
+      "Bash(node *)"
     ]
   }
 }

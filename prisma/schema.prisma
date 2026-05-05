@@ -7,48 +7,39 @@ datasource db {
 }
 
 enum Role {
-  USER
-  ADMIN
+  user
+  admin
 }
 
-// ------------------------------------------------------
-// 1. Le Modèle Principal (Fusion Better-Auth + RPG)
-// ------------------------------------------------------
 model Utilisateur {
   id            String    @id @default(uuid())
-  
-  // Champs standards Better-Auth
-  name          String?   // Mappé sur ton 'pseudo' dans auth.ts
+  name          String?
   email         String    @unique
   emailVerified Boolean?
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  // Tes champs RPG personnalisés
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
   niveau        Int       @default(1)
   xp            Int       @default(0)
-  role          Role      @default(USER)
-
-  // Relations
+  role          Role      @default(user)
   sessions      Session[]
   accounts      Account[]
   reponses      Reponse[]
   badges        UtilisateurBadge[]
   historique    HistoriqueQuiz[]
 
-  @@map("user") // CRUCIAL : Dit à Postgres de nommer cette table "user" en base
+  @@map("user")
 }
 
-// ------------------------------------------------------
-// 2. Les Tables Obligatoires de Better-Auth
-// ------------------------------------------------------
 model Session {
-  id        String   @id @default(uuid())
+  id        String      @id @default(uuid())
   expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  token     String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
@@ -58,7 +49,7 @@ model Session {
 }
 
 model Account {
-  id                    String    @id @default(uuid())
+  id                    String      @id @default(uuid())
   accountId             String
   providerId            String
   userId                String
@@ -70,8 +61,8 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
   @@map("account")
 }
@@ -87,27 +78,22 @@ model Verification {
   @@map("verification")
 }
 
-// ------------------------------------------------------
-// 3. Tes Modèles Métier (Inchangés)
-// ------------------------------------------------------
 model Question {
   id               String    @id @default(uuid())
   contenu          String
-  difficulte       String    
+  difficulte       String
   reponse_attendue String
   reponses         Reponse[]
 }
 
 model Reponse {
-  id             String      @id @default(uuid())
-  est_correct    Boolean
-  temps_reponse  Int         
-  
-  utilisateurId  String
-  utilisateur    Utilisateur @relation(fields: [utilisateurId], references: [id])
-  
-  questionId     String
-  question       Question    @relation(fields: [questionId], references: [id])
+  id            String      @id @default(uuid())
+  est_correct   Boolean
+  temps_reponse Int
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  questionId    String
+  question      Question    @relation(fields: [questionId], references: [id])
 }
 
 model Badge {
@@ -121,10 +107,8 @@ model Badge {
 model UtilisateurBadge {
   id            String      @id @default(uuid())
   dateObtention DateTime    @default(now())
-
   utilisateurId String
   utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
-
   badgeId       String
   badge         Badge       @relation(fields: [badgeId], references: [id])
 }
@@ -135,7 +119,6 @@ model HistoriqueQuiz {
   nbQuestions   Int
   difficulte    String
   datePassage   DateTime    @default(now())
-
   utilisateurId String
   utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id], onDelete: Cascade)
 }

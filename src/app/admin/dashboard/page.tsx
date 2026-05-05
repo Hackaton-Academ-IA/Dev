@@ -20,14 +20,26 @@ export default async function AdminDashboardPage() {
     redirect("/dashboard");
   }
 
-  const utilisateurs = await prisma.utilisateur.findMany({
+  // 1. On récupère les données brutes (avec "name")
+  const rawUtilisateurs = await prisma.utilisateur.findMany({
     orderBy: { niveau: "desc" },
-    select: { id: true, pseudo: true, email: true, niveau: true, xp: true, role: true },
+    select: { id: true, name: true, email: true, niveau: true, xp: true, role: true },
   });
 
+ // 2. Le Mapping : On adapte les données pour satisfaire le composant Client
+  const utilisateursFormates = rawUtilisateurs.map((u) => ({
+    id: u.id,
+    pseudo: String(u.name || "Aventurier Anonyme"), // On s'assure que c'est bien un String
+    email: u.email,
+    niveau: u.niveau,
+    xp: u.xp,
+    role: (u.role.toLowerCase() === "admin" ? "admin" : "user") as "admin" | "user",
+  }));
+
+  // 3. On envoie les données formatées en toute sécurité
   return (
     <AdminDashboardClient
-      utilisateurs={utilisateurs}
+      utilisateurs={utilisateursFormates}
       adminId={session.user.id}
       adminEmail={session.user.email}
     />

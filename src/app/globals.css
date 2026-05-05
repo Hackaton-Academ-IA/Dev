@@ -451,3 +451,109 @@
     position: relative;
   }
 }
+
+/* ─── Leaderboard additions ──────────────────────── */
+:root {
+  --silver: #c7d0e0;
+  --bronze: #cf7f3c;
+}
+
+@keyframes lb-float   { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+@keyframes lb-shimmer { 0%{ background-position:-120% 0; } 100%{ background-position:220% 0; } }
+
+@layer components {
+  .panel-silver  { box-shadow: inset 0 0 0 2px #3a4258, 0 0 0 2px var(--silver), 0 6px 0 0 #000, 0 0 0 6px #000; }
+  .panel-bronze  { box-shadow: inset 0 0 0 2px #4d2a10, 0 0 0 2px var(--bronze), 0 6px 0 0 #000, 0 0 0 6px #000; }
+
+  .titlebar-silver { background: repeating-linear-gradient(90deg, #6a7385 0 6px, #4a5266 6px 12px); }
+  .titlebar-bronze { background: repeating-linear-gradient(90deg, #9a5a26 0 6px, #6c3e15 6px 12px); }
+
+  .glow-silver { color:#fff; text-shadow: 2px 2px 0 #000, 0 0 8px var(--silver), 0 0 14px var(--silver); }
+  .glow-bronze { color:#fff; text-shadow: 2px 2px 0 #000, 0 0 8px var(--bronze), 0 0 14px var(--bronze); }
+
+  .chip-silver { background: var(--silver); color: #0a0c14; }
+  .chip-bronze { background: var(--bronze); color: #1c0d05; }
+
+  .neon-title {
+    color: #fff;
+    text-shadow: 2px 2px 0 #000, 0 0 6px var(--gold), 0 0 14px var(--gold),
+                 0 0 28px var(--neon-violet), 0 0 48px var(--neon-violet);
+  }
+
+  .tab {
+    font-family: var(--font-press-start); font-size: 10px;
+    padding: 10px 14px; border: 4px solid #000; background: #0d0a1a;
+    color: var(--ink-dim);
+    box-shadow: 0 4px 0 #000, inset 0 0 0 2px #2a1c5e;
+    cursor: pointer;
+    transition: background .1s, color .1s, box-shadow .1s, transform .04s;
+  }
+  .tab:hover  { background: #160d33; color: #fff; }
+  .tab.active {
+    background: var(--neon-violet); color: #fff; text-shadow: 2px 2px 0 #000;
+    box-shadow: 0 4px 0 #000, inset 0 -4px 0 rgba(0,0,0,.35), 0 0 18px rgba(177,75,255,.5);
+  }
+  .tab:active { transform: translateY(3px); box-shadow: 0 1px 0 #000, inset 0 0 0 2px #2a1c5e; }
+
+  .lb-head {
+    display: grid;
+    grid-template-columns: 56px 64px 1.5fr 1fr 1fr 0.9fr;
+    gap: 14px; padding: 10px 14px;
+    background: #1a1233; border-bottom: 4px solid #000;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.3);
+  }
+  .lb-head > div { font-family: var(--font-press-start); font-size: 9px; color: var(--ink-dim); text-shadow: 1px 1px 0 #000; }
+
+  .lb-row {
+    display: grid;
+    grid-template-columns: 56px 64px 1.5fr 1fr 1fr 0.9fr;
+    align-items: center; gap: 14px;
+    padding: 10px 14px; background: #0a0720;
+    border-top: 3px solid #000; border-bottom: 3px solid #000;
+    margin-bottom: -3px;
+    transition: background .1s, box-shadow .1s; cursor: pointer;
+  }
+  .lb-row:hover {
+    background: #11093a;
+    box-shadow: inset 0 0 0 2px var(--neon-violet), inset 0 0 24px rgba(177,75,255,0.2);
+  }
+  .lb-row.me {
+    background: linear-gradient(90deg, #0a3d22 0%, #11093a 60%, #0a0720 100%);
+    box-shadow: inset 0 0 0 2px var(--emerald), inset 0 0 24px rgba(30,234,124,0.2);
+  }
+
+  @media (max-width: 780px) {
+    .lb-head, .lb-row { grid-template-columns: 44px 48px 1fr auto; gap: 10px; padding: 8px 10px; }
+    .lb-col-floor, .lb-col-guild { display: none; }
+  }
+
+  .pedestal {
+    border: 4px solid #000;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.3) 0 4px, transparent 4px 8px),
+      linear-gradient(180deg, rgba(255,255,255,0.1), transparent 60%);
+    box-shadow: inset 0 -8px 0 rgba(0,0,0,.45), 0 6px 0 #000;
+  }
+  .ped-gold   { background-color: var(--gold); }
+  .ped-silver { background-color: var(--silver); }
+  .ped-bronze { background-color: var(--bronze); }
+
+  .floaty         { animation: lb-float 2.4s ease-in-out infinite; }
+  .floaty.delay-1 { animation-delay: .4s; }
+  .floaty.delay-2 { animation-delay: .8s; }
+
+  .shimmer { position: relative; overflow: hidden; }
+  .shimmer::after {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: lb-shimmer 3.2s linear infinite;
+  }
+
+  .sticky-me {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 4000;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.6) 30%, #000 100%);
+    padding: 10px 14px 12px;
+    border-top: 4px solid #000;
+  }
+}

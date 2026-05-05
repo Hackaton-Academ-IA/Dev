@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 /* ── Types ──────────────────────────────────────────────── */
 type Utilisateur = {
@@ -9,7 +11,7 @@ type Utilisateur = {
   email: string;
   niveau: number;
   xp: number;
-  role: "USER" | "ADMIN";
+  role: "user" | "admin";
 };
 
 type Props = {
@@ -176,10 +178,10 @@ const WarnIcon = ({ size = 42 }: { size?: number }) => (
 );
 
 /* ── UI helpers ─────────────────────────────────────────── */
-function RoleChip({ role }: { role: "USER" | "ADMIN" }) {
+function RoleChip({ role }: { role: "user" | "admin" }) {
   return (
-    <span className={`chip ${role === "ADMIN" ? "chip-violet" : "chip-blue"}`}>
-      {role}
+    <span className={`chip ${role === "admin" ? "chip-violet" : "chip-blue"}`}>
+      {role.toUpperCase()}
     </span>
   );
 }
@@ -210,8 +212,10 @@ function LevelBar({ niveau }: { niveau: number }) {
 }
 
 /* ── KPI Strip ──────────────────────────────────────────── */
-function KPIStrip({ players }: { players: Utilisateur[] }) {
-  const admins = players.filter((u) => u.role === "ADMIN").length;
+function KPIStrip({ players, adminId }: { players: Utilisateur[]; adminId: string }) {
+  const admins = players.filter(
+    (u) => u.role === "admin" || u.id === adminId
+  ).length;
   const topLevel = players[0]?.niveau ?? 0;
   const items = [
     {
@@ -392,6 +396,13 @@ function PlayerTable({
 
 /* ── Sidebar ────────────────────────────────────────────── */
 function SideBar({ adminEmail }: { adminEmail: string }) {
+  const navItems = [
+    { label: "DASHBOARD", active: false, disabled: false },
+    { label: "JOUEURS",   active: true,  disabled: false },
+    { label: "LOGS",      active: false, disabled: true  },
+    { label: "SETTINGS",  active: false, disabled: true  },
+  ];
+
   return (
     <aside className="panel panel-blue">
       <div className="titlebar titlebar-blue flex items-center justify-between">
@@ -403,12 +414,18 @@ function SideBar({ adminEmail }: { adminEmail: string }) {
         </div>
       </div>
       <div className="p-4 space-y-2">
-        {["DASHBOARD", "JOUEURS", "LOGS", "SETTINGS"].map((k, i) => (
+        {navItems.map((item, i) => (
           <button
             key={i}
-            className={`nav-link justify-between ${k === "JOUEURS" ? "active" : ""}`}
+            disabled={item.disabled}
+            className={`nav-link justify-between ${item.active ? "active" : ""} ${item.disabled ? "opacity-30 cursor-not-allowed" : ""}`}
           >
-            <span>▶ {k}</span>
+            <span>▶ {item.label}</span>
+            {item.disabled && (
+              <span className="font-pixel text-[8px] text-[var(--ink-dim)]">
+                SOON
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -457,17 +474,19 @@ function EraseModal({
 
   useEffect(() => {
     if (!player) {
-      setConfirmText("");
-      return;
+      // On décale la réinitialisation pour éviter le rendu en cascade (règle React)
+      const timer = setTimeout(() => setConfirmText(""), 0);
+      return () => clearTimeout(timer);
     }
+    
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCancel();
       if (e.key === "Enter" && ok && !loading) onConfirm();
     };
+    
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [player, ok, loading, onCancel, onConfirm]);
-
   if (!player) return null;
 
   return (
@@ -581,6 +600,111 @@ function EraseModal({
   );
 }
 
+/* ── Bulk Erase Modal ───────────────────────────────────── */
+function BulkEraseModal({
+  count,
+  open,
+  onCancel,
+  onConfirm,
+  loading,
+}: {
+  count: number;
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[5500] flex items-center justify-center p-4"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+    >
+      <div className="rpg-modal modal-pop max-w-[520px] w-full p-1">
+        {[
+          "absolute w-[14px] h-[14px] bg-white border-[3px] border-black -top-[7px] -left-[7px]",
+          "absolute w-[14px] h-[14px] bg-white border-[3px] border-black -top-[7px] -right-[7px]",
+          "absolute w-[14px] h-[14px] bg-white border-[3px] border-black -bottom-[7px] -left-[7px]",
+          "absolute w-[14px] h-[14px] bg-white border-[3px] border-black -bottom-[7px] -right-[7px]",
+        ].map((cls, i) => (
+          <span key={i} className={cls} />
+        ))}
+
+        <div className="p-6 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="warn-blink">
+              <WarnIcon size={48} />
+            </div>
+            <div>
+              <div
+                className="font-pixel text-[14px] text-white"
+                style={{ textShadow: "2px 2px 0 #000, 0 0 10px var(--danger)" }}
+              >
+                ⚠ SUPPRESSION GROUPÉE
+              </div>
+              <div className="font-pixel text-[10px] text-[#ddd] mt-1">
+                {count} JOUEUR(S) · ACTION IRRÉVERSIBLE
+              </div>
+            </div>
+          </div>
+
+          <div className="font-mono-pixel text-[20px] leading-[1.45] text-white">
+            <div className="text-[var(--emerald)]">
+              &gt; <span className="caret">&nbsp;</span>
+            </div>
+            <p className="mt-1">
+              Supprimer{" "}
+              <span className="text-[var(--danger)]">{count} joueur(s)</span>{" "}
+              sélectionné(s) ?{" "}
+              <span className="text-[var(--danger)]">Cannot be undone.</span>
+            </p>
+            <p className="mt-3 text-[var(--ink-dim)] text-[17px]">
+              Badges, réponses et progression de ces joueurs seront{" "}
+              <span className="text-white">purgés du donjon.</span>
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <button
+              onClick={onCancel}
+              className="arcade arcade-ghost text-[12px]"
+              style={{
+                background: "#1a1233",
+                color: "#fff",
+                boxShadow: "0 6px 0 #000, inset 0 0 0 2px #444",
+              }}
+            >
+              ANNULER
+            </button>
+            <button
+              onClick={!loading ? onConfirm : undefined}
+              disabled={loading}
+              className={`arcade arcade-danger text-[12px] ${loading ? "disabled" : ""}`}
+            >
+              <SkullIcon size={16} />{" "}
+              {loading ? "..." : `PURGER ${count} JOUEUR(S)`}
+            </button>
+          </div>
+
+          <div className="text-center font-mono-pixel text-[14px] text-[var(--ink-dim)]">
+            [ESC] Annuler
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Toast ──────────────────────────────────────────────── */
 function Toast({ msg, onClose }: { msg: string | null; onClose: () => void }) {
   useEffect(() => {
@@ -607,16 +731,24 @@ function Toast({ msg, onClose }: { msg: string | null; onClose: () => void }) {
 /* ── App shell ──────────────────────────────────────────── */
 export default function AdminDashboardClient({
   utilisateurs,
-  adminId: _adminId,
+  adminId,
   adminEmail,
 }: Props) {
+  const router = useRouter();
   const [players, setPlayers] = useState<Utilisateur[]>(utilisateurs);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | "USER" | "ADMIN">("all");
+  const [filter, setFilter] = useState<"all" | "user" | "admin">("all");
   const [askDelete, setAskDelete] = useState<Utilisateur | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [askBulkDelete, setAskBulkDelete] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    await authClient.signOut();
+    router.push("/login");
+  }, [router]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -635,6 +767,11 @@ export default function AdminDashboardClient({
   const allSelected =
     filtered.length > 0 && filtered.every((p) => selected[p.id]);
 
+  const selectedCount = useMemo(
+    () => players.filter((p) => selected[p.id]).length,
+    [players, selected]
+  );
+
   const toggleSelectAll = () => {
     if (allSelected) {
       const next = { ...selected };
@@ -644,6 +781,34 @@ export default function AdminDashboardClient({
       const next = { ...selected };
       filtered.forEach((p) => (next[p.id] = true));
       setSelected(next);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const toDelete = players.filter((p) => selected[p.id]);
+    if (toDelete.length === 0) return;
+    setBulkDeleteLoading(true);
+    try {
+      await Promise.all(
+        toDelete.map((p) =>
+          fetch(`/api/admin/users/${p.id}`, { method: "DELETE" }).then((r) => {
+            if (!r.ok) throw new Error(`Delete failed for ${p.id}`);
+          })
+        )
+      );
+      const deletedIds = new Set(toDelete.map((p) => p.id));
+      setPlayers((ps) => ps.filter((p) => !deletedIds.has(p.id)));
+      setSelected((s) => {
+        const n = { ...s };
+        toDelete.forEach((p) => delete n[p.id]);
+        return n;
+      });
+      setToast(`${toDelete.length} JOUEUR(S) SUPPRIMÉ(S)`);
+      setAskBulkDelete(false);
+    } catch {
+      setToast("ERREUR : SUPPRESSION PARTIELLE OU IMPOSSIBLE");
+    } finally {
+      setBulkDeleteLoading(false);
     }
   };
 
@@ -701,11 +866,26 @@ export default function AdminDashboardClient({
               <span className="caret">&nbsp;</span>
             </div>
           </div>
-          <div className="hidden md:flex flex-col items-end font-mono-pixel text-[16px] leading-tight">
-            <div className="text-white truncate max-w-[220px]">{adminEmail}</div>
-            <div className="text-[var(--ink-dim)] text-[14px]">
-              SUPERUSER · CLEARANCE 9
+          <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+            <div className="hidden md:flex flex-col items-end font-mono-pixel text-[16px] leading-tight mr-2">
+              <div className="text-white truncate max-w-[220px]">{adminEmail}</div>
+              <div className="text-[var(--ink-dim)] text-[14px]">
+                SUPERUSER · CLEARANCE 9
+              </div>
             </div>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="arcade text-[10px] flex items-center gap-2"
+              style={{ background: "#0d1b2a", boxShadow: "0 4px 0 #000, inset 0 0 0 2px var(--neon-blue)", color: "var(--neon-blue)" }}
+            >
+              ▲ ACCUEIL
+            </button>
+            <button
+              onClick={handleLogout}
+              className="arcade arcade-danger text-[10px] flex items-center gap-2"
+            >
+              ⏻ DÉCONNEXION
+            </button>
           </div>
         </div>
 
@@ -727,7 +907,7 @@ export default function AdminDashboardClient({
       </header>
 
       {/* ── KPI Strip ── */}
-      <KPIStrip players={players} />
+      <KPIStrip players={players} adminId={adminId} />
 
       {/* ── Main grid ── */}
       <div className="grid lg:grid-cols-[1fr_260px] gap-5">
@@ -760,25 +940,39 @@ export default function AdminDashboardClient({
                 <span className="font-pixel text-[9px] text-[var(--ink-dim)]">
                   FILTER
                 </span>
-                {(["all", "USER", "ADMIN"] as const).map((f) => (
+                {(["all", "user", "admin"] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
                     className={`chip cursor-pointer ${
                       filter === f
-                        ? f === "ADMIN"
+                        ? f === "admin"
                           ? "chip-violet"
-                          : f === "USER"
+                          : f === "user"
                           ? "chip-blue"
                           : "chip-emerald"
                         : "chip-ghost"
                     }`}
                   >
-                    {f === "all" ? "TOUS" : f}
+                    {f === "all" ? "TOUS" : f.toUpperCase()}
                   </button>
                 ))}
               </div>
             </div>
+
+            {selectedCount > 0 && (
+              <div className="px-4 pb-4 flex items-center gap-3 border-t-2 border-[#1a1233] pt-3">
+                <span className="font-pixel text-[9px] text-[var(--danger)]">
+                  ▶ {selectedCount} JOUEUR(S) SÉLECTIONNÉ(S)
+                </span>
+                <button
+                  onClick={() => setAskBulkDelete(true)}
+                  className="arcade arcade-danger text-[10px] flex items-center gap-2"
+                >
+                  <TrashIcon size={14} /> SUPPRIMER LA SÉLECTION
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Player table */}
@@ -816,6 +1010,13 @@ export default function AdminDashboardClient({
         onCancel={() => setAskDelete(null)}
         onConfirm={handleConfirmDelete}
         loading={deleteLoading}
+      />
+      <BulkEraseModal
+        count={selectedCount}
+        open={askBulkDelete}
+        onCancel={() => setAskBulkDelete(false)}
+        onConfirm={handleBulkDelete}
+        loading={bulkDeleteLoading}
       />
       <Toast msg={toast} onClose={() => setToast(null)} />
     </div>

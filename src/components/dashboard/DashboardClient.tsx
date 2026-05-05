@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { PixelBadge } from "@/components/ui/PixelIcons";
 
@@ -104,7 +105,7 @@ function Sparkles({ trigger }: { trigger: number }) {
 }
 
 /* ── Header with marquee ticker ── */
-function Header({ name, level, coins, onLogout }: { name: string; level: number; coins: number; onLogout: () => void }) {
+function Header({ name, level, coins, onLogout, isAdmin }: { name: string; level: number; coins: number; onLogout: () => void; isAdmin?: boolean }) {
   const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
   return (
     <header className="panel panel-violet">
@@ -144,6 +145,21 @@ function Header({ name, level, coins, onLogout }: { name: string; level: number;
             <span className="mx-2">|</span>
             <span className="font-pixel text-[10px] text-[var(--emerald)]">LV {level}</span>
           </div>
+          {isAdmin && (
+            <Link
+              href="/admin/dashboard"
+              className="arcade arcade-gold text-[10px] flex items-center gap-1"
+              style={{ boxShadow: "0 6px 0 #000, inset 0 -4px 0 rgba(0,0,0,.35), 0 0 12px var(--gold)" }}
+            >
+              👑 CONSOLE GM
+            </Link>
+          )}
+          <Link
+            href="/leaderboard"
+            className="arcade arcade-ghost text-[10px] flex items-center gap-1"
+          >
+            🏆 CLASSEMENT
+          </Link>
           <button className="arcade arcade-red text-[10px]" onClick={onLogout}>
             ⏻ LOG OUT
           </button>
@@ -521,7 +537,7 @@ function LogoutOverlay({ onCancel, onConfirm }: { onCancel: () => void; onConfir
 }
 
 /* ── Root dashboard client ── */
-export default function DashboardClient({ playerName }: { playerName: string }) {
+export default function DashboardClient({ playerName, isAdmin }: { playerName: string; isAdmin?: boolean }) {
   const router = useRouter();
   const [xp, setXp] = useState(7320);
   const xpMax = 10000;
@@ -554,6 +570,7 @@ export default function DashboardClient({ playerName }: { playerName: string }) 
         level={level}
         coins={coins}
         onLogout={() => setConfirmLogout(true)}
+        isAdmin={isAdmin}
       />
 
       <PlayerProfile
