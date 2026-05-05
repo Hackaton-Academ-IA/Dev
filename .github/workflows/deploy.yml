@@ -17,18 +17,43 @@ jobs:
       - run: npm run test
 
   deploy:
-    name: Docker Deployment
+    name: Remote SSH Deployment
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy with Docker Compose
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: POSTGRES_USER,POSTGRES_PASSWORD,POSTGRES_DB,NEXT_PUBLIC_GEMINI_API_KEY,BETTER_AUTH_SECRET,BETTER_AUTH_URL
         env:
-          POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ vars.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-        run: |
-          # Note : Ici, docker-compose build s'assure que l'image est saine
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          target_dir: ${{ secrets.TARGET_DIR }}
+        script: |
+          cd $target_dir
+          git pull origin main
+          
+          # Création/Mise à jour du .env avec les variables GitHub
+          echo "POSTGRES_USER=$POSTGRES_USER" > .env
+          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
+          echo "POSTGRES_DB=$POSTGRES_DB" >> .env
+          echo "NEXT_PUBLIC_GEMINI_API_KEY=$NEXT_PUBLIC_GEMINI_API_KEY" >> .env
+          echo "BETTER_AUTH_SECRET=$BETTER_AUTH_SECRET" >> .env
+          echo "BETTER_AUTH_URL=$BETTER_AUTH_URL" >> .env
+          
+          # Mise à jour des dépendances et client Prisma
+          docker-compose run --rm web npx prisma migrate deploy
+          
+          # Reconstruction et redémarrage
           docker-compose up -d --build
+          docker image prune -f
