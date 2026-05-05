@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authClient } from "@/lib/auth-client";
@@ -30,8 +31,16 @@ export default function SignupForm() {
       {
         onRequest: () => setLoading(true),
         onResponse: () => setLoading(false),
-        onError: (ctx) =>
-          setServerError(ctx.error.message || "Une erreur est survenue lors de l'inscription."),
+        onError: (ctx) => {
+          const code = ctx.error.status;
+          if (code === 422 || ctx.error.message?.toLowerCase().includes("already exists")) {
+            setServerError("Cet email est déjà utilisé. Connecte-toi ou choisis un autre email.");
+          } else if (code === 400) {
+            setServerError(ctx.error.message || "Données invalides. Vérifie les champs.");
+          } else {
+            setServerError("Erreur de connexion — réessaie dans quelques instants.");
+          }
+        },
         onSuccess: () => {
           router.push("/");
           router.refresh();
@@ -181,9 +190,9 @@ export default function SignupForm() {
 
             <div className="text-center font-mono-pixel text-[16px] text-[var(--ink-dim)] pt-1">
               Déjà un compte ?{" "}
-              <a href="/login" className="text-[var(--elec-blue)] hover:text-white font-pixel text-[10px] ml-1">
+              <Link href="/login" className="text-[var(--elec-blue)] hover:text-white font-pixel text-[10px] ml-1">
                 ▶ SE CONNECTER
-              </a>
+              </Link>
             </div>
           </div>
         </div>
