@@ -50,13 +50,13 @@ function GuildModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  // TODO: implémente la logique d'envoi ici (5-10 lignes)
-  // Reçoit : org, email, message
-  // Options : fetch vers une API route, mailto:, ou console.log pour le hackathon
-  // Pense à : validation basique, feedback visuel après envoi, fermer la modale
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // ta logique ici
+    if (!org || !email) return;
+    const subject = encodeURIComponent(`[ACADEM'IA] Demande de démo — ${org}`);
+    const body = encodeURIComponent(`Organisation: ${org}\nEmail: ${email}\n\n${message}`);
+    window.open(`mailto:contact@academ-ia.tech?subject=${subject}&body=${body}`);
+    onClose();
   }
 
   const inputCls = "w-full bg-[#07050f] border-4 border-black p-3 font-mono-pixel text-[16px] text-white placeholder:text-[var(--ink-dim)] focus:outline-none focus:border-[var(--elec-blue)]";
