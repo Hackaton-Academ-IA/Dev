@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 export default function NavBar() {
   const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
 
   return (
@@ -35,12 +37,34 @@ export default function NavBar() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/login" className="arcade arcade-ghost text-[9px] hidden sm:inline-flex">
-            ▷ CONNEXION
-          </Link>
-          <button className="arcade arcade-emerald text-[9px] sm:text-[10px]" onClick={() => router.push("/login")}>
-            ▶ DÉMARRER
-          </button>
+          {isPending ? (
+            <span className="font-pixel text-[9px] text-[var(--ink-dim)]">…</span>
+          ) : session ? (
+            <>
+              <span className="font-pixel text-[9px] text-[var(--gold)] hidden sm:inline glow-gold">
+                SALUT, {session.user.name?.split(" ")[0].toUpperCase()} !
+              </span>
+              <Link href="/dashboard" className="arcade arcade-emerald text-[9px] sm:text-[10px]">
+                ▶ DASHBOARD
+              </Link>
+              <button
+                className="arcade text-[9px] sm:text-[10px]"
+                style={{ background: "var(--danger)", boxShadow: "0 4px 0 #7a0c14, inset 0 1px 0 rgba(255,255,255,.15)" }}
+                onClick={() => authClient.signOut({ fetchOptions: { onSuccess: () => { router.push("/"); router.refresh(); } } })}
+              >
+                ✕ QUITTER
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="arcade arcade-ghost text-[9px] hidden sm:inline-flex">
+                ▷ CONNEXION
+              </Link>
+              <button className="arcade arcade-emerald text-[9px] sm:text-[10px]" onClick={() => router.push("/login")}>
+                ▶ DÉMARRER
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

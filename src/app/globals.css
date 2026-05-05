@@ -42,6 +42,7 @@
 /* ─── Base ───────────────────────────────────────────────── */
 @layer base {
   html, body { background: var(--bg); }
+  html { scroll-behavior: smooth; }
 
   body {
     font-family: var(--font-vt323), ui-monospace, monospace;
