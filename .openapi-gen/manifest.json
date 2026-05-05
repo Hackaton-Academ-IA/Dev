@@ -1,0 +1,33 @@
+{
+  "configPath": "C:\\Users\\tiplo\\Desktop\\DevHackathon\\next.openapi.json",
+  "outputFile": "C:\\Users\\tiplo\\Desktop\\DevHackathon\\public\\openapi.json",
+  "diagnostics": [],
+  "performance": {
+    "prepareTemplateMs": 0.1542999999999779,
+    "loadCustomFragmentsMs": 0.0012000000000398359,
+    "prepareDocumentMs": 0.15550000000001774,
+    "scanRouteFilesMs": 0.4030999999999949,
+    "deriveRoutePathMs": 0.13769999999999527,
+    "filterRouteCandidatesMs": 0.019000000000005457,
+    "sourcePrecheckMs": 0.28449999999998,
+    "readRouteFilesMs": 0.11559999999997217,
+    "parseRouteFilesMs": 0,
+    "analyzeRouteFilesMs": 0,
+    "typescriptResponseInferenceMs": 0,
+    "processRouteFilesMs": 0,
+    "registerRouteMs": 0,
+    "getSchemaContentMs": 0,
+    "createRequestParamsMs": 0,
+    "createRequestBodyMs": 0,
+    "processResponsesMs": 0,
+    "createResponseSchemaMs": 0,
+    "buildOperationsMs": 0,
+    "sortAndMergePathsMs": 0.06990000000001828,
+    "buildPathsMs": 0.06990000000001828,
+    "defaultComponentsAndErrorsMs": 0.1996000000000322,
+    "mergeSchemasMs": 0.05570000000000164,
+    "finalizeDocumentMs": 0.730199999999968,
+    "totalMs": 2.7028999999999996,
+    "scanRoutesMs": 0.4030999999999949
+  }
+}

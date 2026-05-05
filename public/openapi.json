@@ -1,0 +1,92 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AcademIA API",
+    "version": "1.0.0",
+    "description": "Documentation de l'API AcademIA incluant l'authentification et les services."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Serveur de développement"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Endpoints d'authentification gérés par Better Auth"
+    }
+  ],
+  "paths": {
+    "/api/auth/signup/email": {
+      "post": {
+        "summary": "Inscription par email",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 8 },
+                  "name": { "type": "string" }
+                },
+                "required": ["email", "password", "name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Utilisateur créé avec succès" },
+          "400": { "description": "Requête invalide ou utilisateur déjà existant" }
+        }
+      }
+    },
+    "/api/auth/sign-in/email": {
+      "post": {
+        "summary": "Connexion par email",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Connexion réussie" },
+          "401": { "description": "Identifiants invalides" }
+        }
+      }
+    },
+    "/api/auth/sign-out": {
+      "post": {
+        "summary": "Déconnexion",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Déconnexion réussie" }
+        }
+      }
+    },
+    "/api/auth/get-session": {
+      "get": {
+        "summary": "Récupérer la session actuelle",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Session active récupérée" },
+          "401": { "description": "Non authentifié" }
+        }
+      }
+    }
+  }
+}
