@@ -1,0 +1,28 @@
+services:
+  # Service pour la base de données
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: $postgres_user
+      POSTGRES_PASSWORD: $postgres_password
+      POSTGRES_DB: $postgres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # Service pour l'application Next.js
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://$postgres_user:$postgres_password@db:5432/$postgres_db
+    depends_on:
+      - db
+
+volumes:
+  db-data:
