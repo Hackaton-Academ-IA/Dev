@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import { logger } from "@/lib/logger";
 import { UserIcon, LockIcon, EyeIcon, GoogleG, GitHubCat, HeroLogo } from "@/components/ui/PixelIcons";
 
 export default function LoginForm() {
@@ -12,10 +13,22 @@ export default function LoginForm() {
   const [pwd, setPwd]           = useState("");
   const [showPwd, setShowPwd]   = useState(false);
   const [remember, setRemember] = useState(true);
-  const [loading, setLoading]   = useState(false);
-  const [err, setErr]           = useState<string | null>(null);
+  const [loading, setLoading]         = useState(false);
+  const [socialLoading, setSocialLoading] = useState<"google" | "github" | null>(null);
+  const [err, setErr]                 = useState<string | null>(null);
 
   const ready = email.length > 3 && pwd.length >= 4;
+
+  const handleSocialSignIn = async (provider: "google" | "github") => {
+    if (socialLoading) return;
+    setSocialLoading(provider);
+    logger.info("SOCIAL_LOGIN_ATTEMPT", `Provider: ${provider}`);
+    const { error } = await authClient.signIn.social({ provider, callbackURL: "/dashboard" });
+    if (error) {
+      setErr(error.message ?? `Connexion ${provider} échouée.`);
+      setSocialLoading(null);
+    }
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,21 +160,39 @@ export default function LoginForm() {
             <div className="pix-divider">OR · LOAD GAME</div>
 
             <div className="space-y-3">
-              <button type="button" className="save-slot">
+              <button
+                type="button"
+                className={`save-slot ${socialLoading === "google" ? "opacity-70 pointer-events-none" : ""}`}
+                onClick={() => handleSocialSignIn("google")}
+                disabled={!!socialLoading}
+              >
                 <div className="border-[3px] border-black p-1 bg-[#0e0a22]"><GoogleG /></div>
                 <div className="flex-1">
                   <div className="text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>SAVE 02</div>
-                  <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">Continuer avec Google</div>
+                  <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">
+                    {socialLoading === "google" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Continuer avec Google"}
+                  </div>
                 </div>
-                <div className="font-pixel text-[10px] text-[var(--emerald)]">▶</div>
+                <div className="font-pixel text-[10px] text-[var(--emerald)]">
+                  {socialLoading === "google" ? "⏳" : "▶"}
+                </div>
               </button>
-              <button type="button" className="save-slot">
+              <button
+                type="button"
+                className={`save-slot ${socialLoading === "github" ? "opacity-70 pointer-events-none" : ""}`}
+                onClick={() => handleSocialSignIn("github")}
+                disabled={!!socialLoading}
+              >
                 <div className="border-[3px] border-black p-1 bg-[#0e0a22]"><GitHubCat /></div>
                 <div className="flex-1">
                   <div className="text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>SAVE 03</div>
-                  <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">Continuer avec GitHub</div>
+                  <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">
+                    {socialLoading === "github" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Continuer avec GitHub"}
+                  </div>
                 </div>
-                <div className="font-pixel text-[10px] text-[var(--emerald)]">▶</div>
+                <div className="font-pixel text-[10px] text-[var(--emerald)]">
+                  {socialLoading === "github" ? "⏳" : "▶"}
+                </div>
               </button>
             </div>
 
