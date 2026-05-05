@@ -1,0 +1,105 @@
+<h2>Décomposition : Landing Page — Server vs Client Components</h2>
+<p class="subtitle">Next.js App Router — chaque nœud vert est un Server Component (RSC), jaune = Client Component ('use client'). La question clé : où placer la frontière?</p>
+
+<style>
+  .arch-tree { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.8; }
+  .node { display: inline-flex; align-items: center; gap: 8px; padding: 3px 10px; border-radius: 4px; margin: 2px 0; font-weight: 600; }
+  .sc  { background: #1a3a1a; color: #4ade80; border: 1px solid #4ade80; }
+  .cc  { background: #3a3010; color: #fbbf24; border: 1px solid #fbbf24; }
+  .file { color: #94a3b8; font-size: 11px; margin-left: 6px; }
+  .tree-indent { padding-left: 28px; border-left: 2px solid #334155; margin-left: 14px; }
+  .why { font-size: 11px; color: #64748b; font-style: italic; margin-left: 8px; }
+  .legend { display: flex; gap: 20px; margin-bottom: 16px; font-size: 12px; }
+  .section-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 12px; margin-bottom: 4px; }
+</style>
+
+<div class="section">
+  <div class="legend">
+    <span class="node sc">■ Server Component</span>
+    <span class="node cc">■ Client Component</span>
+  </div>
+
+  <div class="arch-tree">
+    <div class="section-label">src/app/</div>
+    <span class="node sc">page.tsx</span><span class="file">— Landing Page (RSC, no state)</span><br/>
+    <div class="tree-indent">
+      <span class="node sc">layout.tsx</span><span class="file">— fonts, metadata</span><br/>
+
+      <div class="section-label">src/components/landing/</div>
+
+      <span class="node cc">NavBar.tsx</span>
+      <span class="why">← onClick CTA + mobile menu state</span><br/>
+
+      <div class="tree-indent">
+        <span class="node sc">LogoPixel.tsx</span><span class="file">— pixel art static</span><br/>
+      </div>
+
+      <span class="node sc">Hero.tsx</span>
+      <span class="why">← static shell, passe CTAButton dedans</span><br/>
+      <div class="tree-indent">
+        <span class="node cc">CTAButton.tsx</span><span class="why">← onClick handler</span><br/>
+        <span class="node sc">Tower.tsx</span><span class="why">← CSS animation only (scrollUp, climb)</span><br/>
+      </div>
+
+      <span class="node sc">ConceptSection.tsx</span>
+      <span class="why">← 100% statique</span><br/>
+      <div class="tree-indent">
+        <span class="node sc">LoopNode.tsx</span><br/>
+        <span class="node sc">LoopArrow.tsx</span><br/>
+      </div>
+
+      <span class="node sc">TargetCards.tsx</span>
+      <span class="why">← statique</span><br/>
+
+      <span class="node cc">MarqueeSection.tsx</span>
+      <span class="why">← scrolling marquee (CSS anim, mais besoin de pause on hover)</span><br/>
+
+      <span class="node sc">StatsStrip.tsx</span><br/>
+
+      <span class="node sc">FAQSection.tsx</span><br/>
+
+      <div class="section-label">src/components/ui/</div>
+      <span class="node sc">PixelIcons.tsx</span>
+      <span class="why">← SVG purs, aucun state → Server</span><br/>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3 stratégies de frontière Client/Server</h3>
+  <div class="options">
+    <div class="option" data-choice="a" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Maximum RSC <span style="color:#4ade80">● Recommandé</span></h3>
+        <p>Seuls <code>CTAButton</code>, <code>NavBar</code> (mobile menu) et <code>MarqueeSection</code> sont Client. <strong>Tower, Hero, ConceptSection</strong> restent Server.</p>
+        <div class="pros-cons" style="margin-top:8px">
+          <div class="pros"><h4>Avantages</h4><ul><li>Bundle JS minimal</li><li>SEO optimal</li><li>Streaming SSR</li></ul></div>
+          <div class="cons"><h4>Inconvénients</h4><ul><li>Prop drilling via Server→Client boundary (useRouter dans CTAButton)</li></ul></div>
+        </div>
+      </div>
+    </div>
+    <div class="option" data-choice="b" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Hero Client partiel</h3>
+        <p><code>Hero.tsx</code> est Client (simplifie la propagation du callback <code>onCTA</code> vers NavBar + CTA). Reste Server : ConceptSection, Tower, etc.</p>
+        <div class="pros-cons" style="margin-top:8px">
+          <div class="pros"><h4>Avantages</h4><ul><li>Migration plus directe depuis le HTML</li><li>Moins de fichiers</li></ul></div>
+          <div class="cons"><h4>Inconvénients</h4><ul><li>+~4KB bundle (Hero inclut Tower)</li></ul></div>
+        </div>
+      </div>
+    </div>
+    <div class="option" data-choice="c" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Page Client entière</h3>
+        <p><code>'use client'</code> sur <code>page.tsx</code>. Migration directe 1-pour-1 depuis le HTML source.</p>
+        <div class="pros-cons" style="margin-top:8px">
+          <div class="pros"><h4>Avantages</h4><ul><li>Le plus rapide à écrire</li></ul></div>
+          <div class="cons"><h4>Inconvénients</h4><ul><li>Pas de SEO</li><li>Bundle lourd</li><li>Mauvaise pratique App Router</li></ul></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
