@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Tower from "./Tower";
 
-export default function Hero() {
+export default function Hero({ onDemoClick }: { onDemoClick: () => void }) {
   return (
     <section className="grid lg:grid-cols-[1.1fr_1fr] gap-5">
       <div className="panel panel-violet">
@@ -33,7 +33,7 @@ export default function Hero() {
             <Link href="/login" className="arcade arcade-emerald arcade-glow text-[12px] sm:text-[14px]">
               ▶ INSERT COIN / COMMENCER
             </Link>
-            <button className="arcade arcade-ghost text-[10px]">▷ VOIR LA DÉMO 90s</button>
+            <button onClick={onDemoClick} className="arcade arcade-ghost text-[10px]">▷ VOIR LA DÉMO 90s</button>
           </div>
 
           <div className="flex flex-wrap gap-5 pt-4 font-mono-pixel text-[16px] text-[var(--ink-dim)]">

@@ -73,13 +73,13 @@ export default function ConceptSection() {
       <div className="panel panel-gold">
         <div className="grid sm:grid-cols-3 divide-x-4 divide-black">
           {[
-            { k: "+38%", v: "de rétention vs cours classiques", c: "glow-gold" },
-            { k: "x2.4", v: "de temps d'étude hebdo", c: "glow-violet" },
-            { k: "4.9/5", v: "note de satisfaction", c: "glow-emerald" },
+            { k: "+38%", v: "de rétention vs cours classiques", c: "glow-gold",    dc: "text-[var(--gold)]"        },
+            { k: "x2.4", v: "de temps d'étude hebdo",           c: "glow-violet",  dc: "text-[var(--neon-violet)]" },
+            { k: "4.9/5", v: "note de satisfaction",             c: "glow-emerald", dc: "text-[var(--emerald)]"     },
           ].map((s, i) => (
             <div key={i} className="p-5 text-center">
               <div className={`font-pixel text-[22px] ${s.c}`}>{s.k}</div>
-              <div className="font-mono-pixel text-[18px] text-[#241a00] mt-1">{s.v}</div>
+              <div className={`font-mono-pixel text-[18px] mt-1 ${s.dc}`}>{s.v}</div>
             </div>
           ))}
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { UserIcon, LockIcon, EyeIcon, GoogleG, GitHubCat, HeroLogo } from "@/components/ui/PixelIcons";
 
@@ -166,7 +167,7 @@ export default function LoginForm() {
 
             <div className="text-center font-mono-pixel text-[16px] text-[var(--ink-dim)] pt-1">
               Pas encore de carte joueur ?{" "}
-              <a href="#" className="text-[var(--gold)] hover:text-white font-pixel text-[10px] ml-1">INSERT COIN ▶</a>
+              <Link href="/signup" className="text-[var(--gold)] hover:text-white font-pixel text-[10px] ml-1">INSERT COIN ▶</Link>
             </div>
           </div>
         </div>

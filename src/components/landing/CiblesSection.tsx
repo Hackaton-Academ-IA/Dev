@@ -10,9 +10,10 @@ interface TargetCardProps {
   cta: string;
   ctaTone: string;
   footnote: string;
+  onCtaClick?: () => void;
 }
 
-function TargetCard({ tone, kicker, title, icon, bullets, cta, ctaTone, footnote }: TargetCardProps) {
+function TargetCard({ tone, kicker, title, icon, bullets, cta, ctaTone, footnote, onCtaClick }: TargetCardProps) {
   const panel = tone === "b2b" ? "panel-blue" : "panel-pink";
   const tbar  = tone === "b2b" ? "titlebar-blue" : "titlebar-pink";
   return (
@@ -96,7 +97,10 @@ function TargetCard({ tone, kicker, title, icon, bullets, cta, ctaTone, footnote
 
         <div className="flex-1" />
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-          <Link href="/login" className={`arcade text-[10px] ${ctaTone}`}>{cta}</Link>
+          {onCtaClick
+            ? <button onClick={onCtaClick} className={`arcade text-[10px] ${ctaTone}`}>{cta}</button>
+            : <Link href="/login" className={`arcade text-[10px] ${ctaTone}`}>{cta}</Link>
+          }
           <span className="font-mono-pixel text-[16px] text-[var(--ink-dim)]">{footnote}</span>
         </div>
       </div>
@@ -104,7 +108,7 @@ function TargetCard({ tone, kicker, title, icon, bullets, cta, ctaTone, footnote
   );
 }
 
-export default function CiblesSection() {
+export default function CiblesSection({ onGuildDemoClick }: { onGuildDemoClick: () => void }) {
   return (
     <section id="cibles" className="space-y-5">
       <div className="flex items-end justify-between flex-wrap gap-3">
@@ -121,7 +125,8 @@ export default function CiblesSection() {
           tone="b2b" kicker="◆ B2B · CENTRES DE FORMATION" title="LA GUILDE"
           icon={<ShieldIcon size={56} />}
           bullets={["Tableau de bord formateur : suivi temps réel des apprenants, streaks, échecs récurrents.","Parcours sur mesure : importez votre référentiel, l'IA génère les quêtes alignées.","Rapports d'assiduité & exports CSV pour audits Qualiopi / OPCO.","Comptes équipe, droits par groupe, SSO Microsoft / Google.","Coût maîtrisé : tarification par siège dégressive."]}
-          cta="DEMANDER UNE DÉMO" ctaTone="arcade-blue" footnote="Onboarding sous 48h · Sans CB" />
+          cta="DEMANDER UNE DÉMO" ctaTone="arcade-blue" footnote="Onboarding sous 48h · Sans CB"
+          onCtaClick={onGuildDemoClick} />
         <TargetCard
           tone="b2c" kicker="◆ B2C · APPRENANTS SOLO" title="L'AVENTURIER"
           icon={<FlagIcon size={56} />}

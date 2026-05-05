@@ -70,7 +70,6 @@ function FinalCTA() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Link href="/login" className="arcade arcade-emerald arcade-glow text-[12px]">▶ INSERT COIN</Link>
-            <button className="arcade arcade-ghost text-[10px]">▷ DEMANDER UNE DÉMO</button>
           </div>
         </div>
         <div className="flex justify-center">
@@ -103,14 +102,31 @@ function FooterLinks() {
           </p>
         </div>
         {[
-          { h: "PRODUIT", links: ["Concept","Tarifs","Modules","Roadmap"] },
-          { h: "SOCIÉTÉ", links: ["À propos","Carrières","Presse","Contact"] },
-          { h: "LÉGAL",   links: ["CGU","Confidentialité","Mentions","Cookies"] },
+          { h: "PRODUIT", links: [
+            { l: "Concept",         href: "#concept" },
+            { l: "Tarifs",          href: "#tarifs"  },
+            { l: "Modules",         href: "#tarifs"  },
+            { l: "Roadmap",         href: "#"        },
+          ]},
+          { h: "SOCIÉTÉ", links: [
+            { l: "À propos",        href: "#"        },
+            { l: "Carrières",       href: "#"        },
+            { l: "Presse",          href: "#"        },
+            { l: "Contact",         href: "#"        },
+          ]},
+          { h: "LÉGAL", links: [
+            { l: "CGU",             href: "/legal/cgu"             },
+            { l: "Confidentialité", href: "/legal/confidentialite" },
+            { l: "Mentions",        href: "/legal/mentions"        },
+            { l: "Cookies",         href: "/legal/cookies"         },
+          ]},
         ].map((col, i) => (
           <div key={i}>
             <div className="font-pixel text-[10px] text-[var(--emerald)] mb-2">{col.h}</div>
             <ul className="font-mono-pixel text-[18px] space-y-1 text-[var(--ink-dim)]">
-              {col.links.map((l, j) => <li key={j}><a href="#" className="hover:text-white">{l}</a></li>)}
+              {col.links.map((item, j) => (
+                <li key={j}><Link href={item.href} className="hover:text-white">{item.l}</Link></li>
+              ))}
             </ul>
           </div>
         ))}
