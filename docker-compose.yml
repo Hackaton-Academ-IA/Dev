@@ -15,20 +15,32 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    # Indique à Docker de charger votre fichier .env manuel
+    # On expose le port 3000 uniquement en interne pour le proxy
+    expose:
+      - "3000"
     env_file:
       - .env
     environment:
-      # On reconstruit l'URL pour Prisma en utilisant les variables du .env
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-    # S'assure que la DB est prête avant de lancer l'app
+    # L'application attend que la base de données soit prête
     depends_on:
       - db
+
+  proxy:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /home/test/academia-certs:/etc/nginx/ssl:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    # Le proxy attend que l'application web soit lancée
+    depends_on:
+      - web
 
 volumes:
   db-data:
