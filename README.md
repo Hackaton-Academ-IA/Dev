@@ -36,6 +36,30 @@ Notre IA (Gemini 2.0 Flash) agit comme un véritable *Game Master* :
 
 ---
 
+## Conformité, Éthique & Juridique
+
+> Academ'IA est conçu pour être prêt pour la production, pas seulement pour la démo.
+
+### Pages Légales (production-ready)
+*   **CGU / CGV** — Conditions générales rédigées pour un produit réel, incluant les droits et obligations de l'utilisateur.
+*   **Politique de Confidentialité** — Conforme au cadre européen, rédigée en langage clair.
+*   **Disclaimer IA** — Clause de non-responsabilité explicite pour les contenus générés par Gemini 2.0 (hallucinations, inexactitudes pédagogiques).
+
+### RGPD & Gestion des Données
+| Principe | Implémentation |
+| :--- | :--- |
+| **Droit à l'oubli** | Suppression en cascade (`onDelete: Cascade`) sur tous les modèles liés à l'utilisateur |
+| **Minimisation** | Seules les données nécessaires sont collectées (email, pseudo, progression) |
+| **Conservation limitée** | Historique de quiz et logs d'audit horodatés, politique de rétention définie |
+| **Chiffrement** | Mots de passe hashés par Better-Auth (bcrypt), tokens HMAC pour l'anti-triche |
+
+### Usage Éthique de l'IA
+*   Gemini est utilisé **uniquement pour la génération de questions éducatives**, avec un système de fallback DB si l'API est indisponible.
+*   Aucune donnée personnelle n'est transmise au modèle IA — seuls le thème et le niveau de difficulté sont envoyés.
+*   Le disclaimer visible dans l'interface informe l'apprenant de la nature générée des questions.
+
+---
+
 ## Architecture du Projet
 Retrouvez nos schémas de conception détaillés dans le dossier `/architecture` :
 *   [**Flux de données**](./architecture/architecture-flux-AcademIA.png) : Cycle de vie d'une requête.
@@ -89,9 +113,37 @@ Retrouvez nos schémas de conception détaillés dans le dossier `/architecture`
 *   **Identité :** Intégration du Favicon, polissage des animations (Game Over Overlay) et design Pixel Art.
 *   **Conformité :** Pages légales (CGU/RGPD) intégrées, prêtes pour la production.
 
+
+#### SEO & Discoverability
+*   **Metadata API Next.js** — Titres, descriptions et mots-clés dynamiques sur chaque page via `export const metadata`.
+*   **`sitemap.ts`** — Sitemap XML généré automatiquement et servi à `/sitemap.xml` pour les crawlers.
+*   **`robots.ts`** — Directive robots personnalisée (`/robots.txt`) pour contrôler l'indexation.
+*   **OpenGraph & Twitter Cards** — Balises `og:title`, `og:description`, `og:image`, `twitter:card` configurées pour un aperçu riche lors du partage sur Discord, Twitter/X, LinkedIn.
+*   **Favicon & Web Manifest** — Icônes multi-résolutions (`favicon.ico`, `apple-touch-icon`) pour un rendu natif sur mobile et onglets.
+
+
+
 ---
 
 ## Tests
 Pour garantir la stabilité des fonctionnalités critiques :
 ```bash
 npm run test
+```
+
+La suite couvre **37 tests** répartis sur 3 fichiers :
+
+| Fichier | Portée |
+| :--- | :--- |
+| `engine.test.ts` | Formules XP, niveaux, adaptPalier, timer — 26 tests |
+| `auth.test.ts` | Validation des schémas login/signup (Zod) — 8 tests |
+| `route.test.ts` | Route API `/quiz/generate` (Gemini mock, fallback) — 3 tests |
+
+---
+
+## Contributeurs
+Projet réalisé en équipe dans le cadre du **Hackathon Academ'IA 2026** en moins de 48h.
+
+---
+
+*© 2026 Academ'IA — All rights reserved.*

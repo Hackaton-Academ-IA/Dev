@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface PixelGridProps {
   rows: string[];
   palette: Record<string, string>;
@@ -199,17 +201,17 @@ export function GitHubCat() {
 }
 
 export function HeroLogo() {
-  const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
   return (
-    <div
-      className="w-[64px] h-[64px] grid grid-cols-8 grid-rows-8 border-4 border-black mx-auto"
-      style={{ boxShadow: "0 6px 0 #000, inset 0 0 0 2px #2c0f4d" }}
-    >
-      {["vvvvvvvv","vKKKvKKv","vKbKvKvv","vKKKvKvv","vKbKvKvv","vKbKvKvv","vvvvvvvv","eeeeeeee"].map((row, y) =>
-        row.split("").map((ch, x) => (
-          <div key={`${x}-${y}`} style={{ background: colorMap[ch] }} />
-        ))
-      )}
+    <div className="mx-auto" style={{ width: 80, height: 80, filter: "drop-shadow(0 6px 0 #000) drop-shadow(0 0 16px #b14bff88)" }}>
+      <Image
+        src="/images/logo-blanc.png"
+        alt="Logo ACADEM'IA"
+        width={80}
+        height={80}
+        className="object-contain"
+        style={{ imageRendering: "pixelated" }}
+        priority
+      />
     </div>
   );
 }

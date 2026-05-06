@@ -24,7 +24,10 @@
       "Bash(xargs grep -l \"daily\\\\|DAILY\\\\|/api/quiz\")",
       "Skill(code-review:code-review)",
       "Bash(xargs grep -l \"TODO\\\\|FIXME\\\\|HACK\\\\|console\\\\.log\")",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('Routes exposées:', list\\(d.get\\('paths',{}\\).keys\\(\\)\\)[:10]\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('Routes exposées:', list\\(d.get\\('paths',{}\\).keys\\(\\)\\)[:10]\\)\")",
+      "Bash(git check-ignore *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\abidel.cda\\\\Documents\\\\hackaton\\\\README.md\")",
+      "Bash(Measure-Object -Line)"
     ]
   }
 }

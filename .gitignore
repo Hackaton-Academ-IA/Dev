@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# --- DEPENDENCIES ---
 /node_modules
 /.pnp
 .pnp.*
@@ -10,45 +10,37 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# --- NEXT.JS & BUILD ---
 /.next/
 /out/
-
-# production
 /build
+/coverage
+*.tsbuildinfo
+next-env.d.ts
 
-# misc
-.DS_Store
+# --- PRISMA ---
+/src/generated/prisma
+
+# --- ENVIRONMENT & SECRETS (CRITIQUE) ---
+.env*
+!.env.example
 *.pem
 
-# debug
+# --- LOGS & DEBUG ---
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 audit.log
 
+# --- PROJECT SPECIFIC (AI & INTERNAL SPECS) ---
+docs/superpowers/
+AGENTS.md
+CLAUDE.md
 
-# env files (can opt-in for committing if needed)
-.env*
-# SAUF le fichier d'exemple
-!.env.example
+# --- OS SPECIFIC ---
+.DS_Store
+Thumbs.db
 
-# vercel
+# --- VERCEL ---
 .vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# audit log (données sensibles — ne pas committer)
-audit.log
-
-/src/generated/prisma
-"docs/superpowers/" 
-"AGENTS.md" 
-"CLAUDE.md" 
-"audit.log" 

@@ -170,7 +170,7 @@ export default function LoginForm() {
                 <div className="flex-1">
                   <div className="text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>SAVE 02</div>
                   <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">
-                    {socialLoading === "google" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Continuer avec Google"}
+                    {socialLoading === "google" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Charger via Google"}
                   </div>
                 </div>
                 <div className="font-pixel text-[10px] text-[var(--emerald)]">
@@ -187,7 +187,7 @@ export default function LoginForm() {
                 <div className="flex-1">
                   <div className="text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>SAVE 03</div>
                   <div className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-1">
-                    {socialLoading === "github" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Continuer avec GitHub"}
+                    {socialLoading === "github" ? <>CONNEXION<span className="caret">&nbsp;</span></> : "Charger via GitHub"}
                   </div>
                 </div>
                 <div className="font-pixel text-[10px] text-[var(--emerald)]">
