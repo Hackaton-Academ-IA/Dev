@@ -146,7 +146,7 @@ async function main() {
       data: {
       email: adminEmail,
       pseudo: 'Administrateur AcademIA',
-      role: 'ADMIN',
+      role: 'admin',
       niveau: 10,
       xp: 10000,
       emailVerified: true, // Vérifie aussi que ce n'est pas "emailVerifie" au passage !
