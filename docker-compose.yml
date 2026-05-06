@@ -17,6 +17,22 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+
+    # --- AJOUT DU SERVICE PROXY POUR LE HTTPS ---
+  proxy:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"   # Pour la redirection HTTP -> HTTPS
+      - "443:443" # Pour le trafic HTTPS sécurisé
+    volumes:
+      # Montage de vos certificats générés précédemment
+      - /home/test/academia-certs:/etc/nginx/ssl:ro
+      # Montage de la configuration Nginx (voir étape suivante)
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+      
     # Indique à Docker de charger votre fichier .env manuel
     env_file:
       - .env
