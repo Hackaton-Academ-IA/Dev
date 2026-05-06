@@ -48,3 +48,7 @@ next-env.d.ts
 audit.log
 
 /src/generated/prisma
+"docs/superpowers/" 
+"AGENTS.md" 
+"CLAUDE.md" 
+"audit.log" 
