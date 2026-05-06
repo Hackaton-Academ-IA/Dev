@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: Dockerfile
     # On expose le port 3000 uniquement en interne pour le proxy
-    expose:
+    ports:
       - "3000"
     env_file:
       - .env
@@ -28,19 +28,6 @@ services:
     # L'application attend que la base de données soit prête
     depends_on:
       - db
-
-  proxy:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /home/test/academia-certs:/etc/nginx/ssl:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    # Le proxy attend que l'application web soit lancée
-    depends_on:
-      - web
-
+      
 volumes:
   db-data:
