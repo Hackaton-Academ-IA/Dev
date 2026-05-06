@@ -28,6 +28,8 @@ model Utilisateur {
   pieces        Int       @default(0)
   lastDailyAt       DateTime?
   dailyQuestsDone   Int       @default(0)
+  streak            Int       @default(0)
+  lastPlayedAt      DateTime?
   role              Role      @default(user)
   sessions      Session[]
   accounts      Account[]
@@ -98,10 +100,12 @@ model Question {
   id               String    @id @default(uuid())
   contenu          String
   difficulte       String
+  matiere          String    // <-- NOUVEAU
+  choix            String[]  // <-- NOUVEAU (Tableau de chaînes de caractères)
+  explication      String    // <-- NOUVEAU
+  correctIndex     Int?      // <-- NOUVEAU (Optionnel, utile pour plus tard)
   reponse_attendue String
-  matiere          String    @default("Culture Générale")
-  choix            String[]
-  explication      String    @default("")
+  
   reponses         Reponse[]
 }
 

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { PixelBadge } from "@/components/ui/PixelIcons";
 import { xpThreshold, niveauFromTotalXp } from "@/lib/game/engine";
+import { type BadgeKind, badgeImageSrc, iconeToKind } from "@/lib/game/badge-utils";
 
 export interface BadgeData {
   id: string;
@@ -13,53 +16,6 @@ export interface BadgeData {
   icone: string;
   xp_requis: number;
   obtained: boolean;
-}
-
-/* ── Question bank (fallback when no AI available) ── */
-const QUESTION_BANK = [
-  {
-    q: "Quel mathématicien grec a démontré l'infinité des nombres premiers ?",
-    choices: ["Pythagore", "Euclide", "Archimède", "Thalès"],
-    correct: 1,
-    expl: "Euclide, dans les Éléments (livre IX), prouve qu'il existe une infinité de nombres premiers.",
-  },
-  {
-    q: "En quelle année la Révolution française a-t-elle débuté ?",
-    choices: ["1689", "1715", "1789", "1804"],
-    correct: 2,
-    expl: "La prise de la Bastille a eu lieu le 14 juillet 1789, marquant le début de la Révolution.",
-  },
-  {
-    q: "Quelle planète possède la plus grande tempête du système solaire ?",
-    choices: ["Mars", "Saturne", "Neptune", "Jupiter"],
-    correct: 3,
-    expl: "La Grande Tache Rouge de Jupiter est un anticyclone géant observé depuis le XVIIe siècle.",
-  },
-  {
-    q: "Qui a peint la voûte de la chapelle Sixtine ?",
-    choices: ["Raphaël", "Michel-Ange", "Léonard de Vinci", "Le Caravage"],
-    correct: 1,
-    expl: "Michel-Ange a peint la voûte entre 1508 et 1512 à la demande du pape Jules II.",
-  },
-  {
-    q: "Quel est l'élément le plus abondant dans l'univers ?",
-    choices: ["Hélium", "Oxygène", "Hydrogène", "Carbone"],
-    correct: 2,
-    expl: "L'hydrogène représente environ 75% de la masse baryonique de l'univers.",
-  },
-  {
-    q: "Dans la mythologie grecque, qui a coupé la tête de Méduse ?",
-    choices: ["Thésée", "Persée", "Héraclès", "Achille"],
-    correct: 1,
-    expl: "Persée tue Méduse à l'aide d'un bouclier-miroir offert par Athéna.",
-  },
-];
-
-interface Question {
-  q: string;
-  choices: string[];
-  correct: number;
-  expl: string;
 }
 
 /* ── Sparkles burst on correct answer ── */
@@ -115,7 +71,6 @@ function Sparkles({ trigger }: { trigger: number }) {
 
 /* ── Header with marquee ticker ── */
 function Header({ name, level, coins, onLogout, isAdmin }: { name: string; level: number; coins: number; onLogout: () => void; isAdmin?: boolean }) {
-  const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
   return (
     <header className="panel panel-violet">
       <div className="titlebar titlebar-violet flex items-center justify-between">
@@ -128,15 +83,16 @@ function Header({ name, level, coins, onLogout, isAdmin }: { name: string; level
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 sm:p-6">
-        <div className="flex items-center gap-4">
-          <div className="w-[64px] h-[64px] grid grid-cols-8 grid-rows-8 border-4 border-black"
-               style={{ boxShadow: "0 6px 0 #000, inset 0 0 0 2px #2c0f4d" }}>
-            {["vvvvvvvv","vKKKvKKv","vKbKvKvv","vKKKvKvv","vKbKvKvv","vKbKvKvv","vvvvvvvv","eeeeeeee"].map((row, y) =>
-              row.split("").map((ch, x) => (
-                <div key={`${x}-${y}`} style={{ background: colorMap[ch] }} />
-              ))
-            )}
-          </div>
+        <Link href="/" className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+          <Image
+            src="/images/logo-blanc.png"
+            alt="Logo ACADEM'IA"
+            width={64}
+            height={64}
+            className="object-contain"
+            style={{ imageRendering: "pixelated" }}
+            priority
+          />
           <div>
             <div className="font-pixel text-[18px] sm:text-[22px] glow-violet leading-none">
               ACADEM<span style={{ color: "#1eea7c" }}>&apos;</span>IA
@@ -145,7 +101,7 @@ function Header({ name, level, coins, onLogout, isAdmin }: { name: string; level
               &gt; LEARN. LEVEL UP. REPEAT.
             </div>
           </div>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-3 flex-wrap">
           <div className="hidden md:flex items-center gap-2 font-mono-pixel text-[16px] text-[var(--ink-dim)]">
@@ -251,7 +207,17 @@ function PlayerProfile({ name, level, xp, xpMax, hp, hpMax, coins, streak }: {
 
           <div>
             <div className="flex items-end justify-between font-mono-pixel text-[14px] text-[var(--ink-dim)] mb-1">
-              <span className="font-pixel text-[10px] text-[var(--emerald)]">XP</span>
+              <span className="flex items-center gap-1.5">
+                <Image
+                  src="/images/icon-xp.jpg"
+                  alt="XP"
+                  width={20}
+                  height={20}
+                  className="object-contain rounded-sm"
+                  style={{ imageRendering: "pixelated" }}
+                />
+                <span className="font-pixel text-[10px] text-[var(--emerald)]">XP</span>
+              </span>
               <span>{xp.toLocaleString()} / {xpMax.toLocaleString()}</span>
             </div>
             <div className="lifebar">
@@ -304,8 +270,21 @@ function PlayerProfile({ name, level, xp, xpMax, hp, hpMax, coins, streak }: {
 /* ── AI Challenge panel ── */
 interface AwardPayload { xp?: number; coins?: number; hp?: number }
 
+interface APIQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+  matiere?: string;
+  source?: "gemini" | "fallback";
+  error?: string;
+}
+
 function AIChallenge({ onAward }: { onAward: (award: AwardPayload) => void }) {
-  const [question, setQuestion] = useState<Question>(QUESTION_BANK[0]);
+  const [question, setQuestion] = useState<APIQuestion | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -313,44 +292,68 @@ function AIChallenge({ onAward }: { onAward: (award: AwardPayload) => void }) {
   const [sparkleKey, setSparkleKey] = useState(0);
   const typingRef = useRef(0);
 
+ // Fetch from Gemini → DB fallback → static fallback
 useEffect(() => {
-  typingRef.current = 0;
   let cancelled = false;
-  
-  const tick = () => {
+
+  const loadQuestion = async () => {
+    // On attend un micro-instant pour sortir du cycle de rendu synchrone
+    await Promise.resolve();
     if (cancelled) return;
-    typingRef.current += 1;
-    setTyped(question.q.slice(0, typingRef.current));
-    if (typingRef.current < question.q.length) {
-      setTimeout(tick, 18);
-    }
-  };
 
-  // On décale l'initialisation pour éviter le rendu en cascade
-  setTimeout(() => {
-    if (!cancelled) {
-      setTyped("");
-      tick();
-    }
-  }, 0);
-
-  return () => { cancelled = true; };
-}, [question]);
-
-  const fetchNew = () => {
+    setLoading(true);
+    setRateLimited(false);
     setPicked(null);
     setRevealed(false);
-    let next: Question;
-    do { next = QUESTION_BANK[Math.floor(Math.random() * QUESTION_BANK.length)]; }
-    while (next.q === question.q && QUESTION_BANK.length > 1);
-    setQuestion(next);
+
+    try {
+      const response = await fetch("/api/quiz/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme: "dashboard", difficulty: "5/10" }),
+        cache: "no-store",
+      });
+
+      if (!cancelled && response.status === 429) {
+        setRateLimited(true);
+        return;
+      }
+
+      const data: APIQuestion | null = response.ok ? await response.json() : null;
+      if (!cancelled && data) setQuestion(data);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
   };
 
+  loadQuestion();
+  return () => { cancelled = true; };
+}, [fetchTrigger]);
+
+  // Typing animation
+  useEffect(() => {
+    if (!question) return;
+    typingRef.current = 0;
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      typingRef.current += 1;
+      setTyped(question.question.slice(0, typingRef.current));
+      if (typingRef.current < question.question.length) setTimeout(tick, 18);
+    };
+    setTimeout(() => { if (!cancelled) { setTyped(""); tick(); } }, 0);
+    return () => { cancelled = true; };
+  }, [question]);
+
+  const fetchNew = () => setFetchTrigger(t => t + 1);
+
   const onPick = (i: number) => {
-    if (revealed) return;
+    if (revealed || !question) return;
     setPicked(i);
     setRevealed(true);
-    if (i === question.correct) {
+    if (i === question.correctAnswer) {
       setStreak((s) => s + 1);
       setSparkleKey((k) => k + 1);
       onAward({ xp: 50 + streak * 10, coins: 12 });
@@ -362,7 +365,8 @@ useEffect(() => {
 
   const letters = ["A", "B", "C", "D"];
   const badgeTones = ["", "b-blue", "b-emerald", "b-gold"];
-  const fullyTyped = typed.length === question.q.length;
+  const fullyTyped = question ? typed.length === question.question.length : false;
+  const isGemini = question?.source === "gemini";
 
   return (
     <section className="panel panel-violet relative">
@@ -371,8 +375,14 @@ useEffect(() => {
           ▶ LE DÉFI DE L&apos;IA
         </div>
         <div className="font-mono-pixel text-[14px] text-white/80 flex items-center gap-2">
-          <span className="inline-block w-2 h-2 bg-[var(--emerald)]" style={{ boxShadow: "0 0 6px var(--emerald)" }} />
-          IA · ONLINE
+          <span
+            className="inline-block w-2 h-2"
+            style={{
+              background: loading ? "var(--gold)" : isGemini ? "var(--emerald)" : "var(--elec-blue)",
+              boxShadow: loading ? "0 0 6px var(--gold)" : isGemini ? "0 0 6px var(--emerald)" : "0 0 6px var(--elec-blue)",
+            }}
+          />
+          {loading ? "CHARGEMENT…" : isGemini ? "GEMINI · ONLINE" : "DB · FALLBACK"}
         </div>
       </div>
 
@@ -381,7 +391,7 @@ useEffect(() => {
           <div className="flex items-center justify-between mb-3 font-mono-pixel text-[14px] text-[var(--ink-dim)]">
             <div className="flex items-center gap-2">
               <span className="font-pixel text-[10px] text-[var(--neon-violet)]">
-                QUEST #{(question.q.length * 7) % 9999}
+                {question?.matiere ?? "GÉNÉRATION…"}
               </span>
               <span>·</span>
               <span>STREAK <span className="text-[var(--emerald)]">x{streak}</span></span>
@@ -391,29 +401,43 @@ useEffect(() => {
 
           <div className="font-pixel text-[14px] sm:text-[16px] leading-[1.7] text-white min-h-[88px]"
                style={{ textShadow: "2px 2px 0 #000" }}>
-            <span style={{ color: "#1eea7c" }}>&gt; </span>{typed}
-            {!fullyTyped && <span className="caret">&nbsp;</span>}
+            {loading ? (
+              <span className="text-[var(--ink-dim)]">
+                <span style={{ color: "#1eea7c" }}>&gt; </span>
+                GÉNÉRATION EN COURS<span className="caret">&nbsp;</span>
+              </span>
+            ) : rateLimited ? (
+              <span className="text-[var(--gold)]">
+                <span style={{ color: "#1eea7c" }}>&gt; </span>
+                ⏳ TROP DE REQUÊTES — PATIENTE 10 SECONDES<span className="caret">&nbsp;</span>
+              </span>
+            ) : (
+              <>
+                <span style={{ color: "#1eea7c" }}>&gt; </span>{typed}
+                {!fullyTyped && <span className="caret">&nbsp;</span>}
+              </>
+            )}
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-3 sm:gap-4 relative">
-          {question.choices.map((c, i) => {
+          {(question?.options ?? ["…", "…", "…", "…"]).map((c, i) => {
             let cls = "qcm";
-            if (revealed) {
-              if (i === question.correct) cls += " correct";
+            if (revealed && question) {
+              if (i === question.correctAnswer) cls += " correct";
               else if (i === picked) cls += " wrong";
               else cls += " muted";
             }
             return (
-              <button key={i} className={cls} disabled={revealed || !fullyTyped} onClick={() => onPick(i)}>
+              <button key={i} className={cls} disabled={revealed || !fullyTyped || loading} onClick={() => onPick(i)}>
                 <span className={`badge-letter ${badgeTones[i]}`}>{letters[i]}</span>
                 <span className="text-[12px] sm:text-[13px] leading-[1.5]" style={{ textShadow: "2px 2px 0 #000" }}>
                   {c}
                 </span>
-                {revealed && i === question.correct && (
+                {revealed && question && i === question.correctAnswer && (
                   <span className="ml-auto font-pixel text-[10px] text-[var(--emerald)]">✔</span>
                 )}
-                {revealed && i === picked && i !== question.correct && (
+                {revealed && i === picked && question && i !== question.correctAnswer && (
                   <span className="ml-auto font-pixel text-[10px] text-[var(--danger)]">✘</span>
                 )}
               </button>
@@ -424,21 +448,22 @@ useEffect(() => {
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
           <div className="font-mono-pixel text-[16px] min-h-[24px]">
-            {revealed && picked === question.correct && (
-              <span className="text-[var(--emerald)]">★ VICTOIRE — {question.expl}</span>
+            {revealed && question && picked === question.correctAnswer && (
+              <span className="text-[var(--emerald)]">★ VICTOIRE — {question.explanation}</span>
             )}
-            {revealed && picked !== question.correct && (
-              <span className="text-[var(--danger)]">✘ RATÉ — {question.expl}</span>
+            {revealed && question && picked !== question.correctAnswer && (
+              <span className="text-[var(--danger)]">✘ RATÉ — {question.explanation}</span>
             )}
             {!revealed && fullyTyped && (
               <span className="text-[var(--ink-dim)]">CHOISIS UNE RÉPONSE — [A][B][C][D]</span>
             )}
           </div>
           <div className="flex gap-3">
-            <button className="arcade arcade-ghost text-[10px]" onClick={fetchNew}>
-              ↻ NOUVELLE QUÊTE
-            </button>
-            {revealed && (
+            {!revealed ? (
+              <button className="arcade arcade-ghost text-[10px]" onClick={fetchNew} disabled={loading}>
+                ↻ NOUVELLE QUÊTE
+              </button>
+            ) : (
               <button className="arcade arcade-emerald text-[10px]" onClick={fetchNew}>
                 ▶ CONTINUER
               </button>
@@ -451,27 +476,6 @@ useEffect(() => {
 }
 
 /* ── Badge inventory ── */
-type BadgeKind = "book" | "sword" | "potion" | "skull" | "crown" | "atom" | "lock" | "heart";
-
-const ICONE_KIND_MAP: Record<string, BadgeKind> = {
-  "📚": "book", "livre": "book", "book": "book",
-  "⚔": "sword", "⚔️": "sword", "sword": "sword", "épée": "sword",
-  "🧪": "potion", "potion": "potion", "alchimie": "potion",
-  "💀": "skull", "skull": "skull", "crâne": "skull",
-  "👑": "crown", "crown": "crown", "couronne": "crown",
-  "⚛": "atom", "⚛️": "atom", "atom": "atom", "science": "atom",
-  "❤": "heart", "❤️": "heart", "heart": "heart", "coeur": "heart",
-};
-
-function iconeToKind(icone: string): BadgeKind {
-  const key = icone.trim().toLowerCase();
-  if (ICONE_KIND_MAP[icone.trim()]) return ICONE_KIND_MAP[icone.trim()];
-  for (const [k, v] of Object.entries(ICONE_KIND_MAP)) {
-    if (key.includes(k.toLowerCase())) return v;
-  }
-  return "lock";
-}
-
 const FALLBACK_BADGES: BadgeData[] = [
   { id: "fb-1", nom: "First Quest",   icone: "📚", xp_requis: 0,    obtained: false },
   { id: "fb-2", nom: "Boss Slayer",   icone: "⚔️", xp_requis: 500,  obtained: false },
@@ -507,7 +511,22 @@ function Inventory({ badges, dailyQuestsDone }: { badges: BadgeData[]; dailyQues
                  className={`relative flex flex-col items-center gap-1 p-2 border-4 border-black ${b.obtained ? "bg-[#0b1a13]" : "bg-[#0e0a22]"}`}
                  style={{ boxShadow: b.obtained ? "inset 0 0 0 2px #0d8f4a, 0 4px 0 #000" : "inset 0 0 0 2px #1a1233, 0 4px 0 #000" }}>
               <div style={{ filter: b.obtained ? "none" : "grayscale(1) brightness(0.35) opacity(0.7)" }}>
-                <PixelBadge kind={iconeToKind(b.icone)} size={36} />
+                {(() => {
+                  const kind = iconeToKind(b.icone);
+                  const src = badgeImageSrc(kind);
+                  return src ? (
+                    <Image
+                      src={src}
+                      alt={b.nom}
+                      width={36}
+                      height={36}
+                      className="object-contain rounded-sm"
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  ) : (
+                    <PixelBadge kind={kind} size={36} />
+                  );
+                })()}
               </div>
               <div className="font-pixel text-[7px] text-center leading-[1.5] w-full truncate"
                    style={{ color: b.obtained ? "#dfffe9" : "var(--ink-dim)", textShadow: "1px 1px 0 #000" }}>
@@ -591,6 +610,47 @@ function AdventureBanner() {
   );
 }
 
+/* ── Game Over overlay ── */
+function GameOverOverlay() {
+  return (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="absolute inset-0 bg-black/75" />
+      <motion.div
+        className="relative z-10 text-center px-8"
+        initial={{ scale: 0.6, y: 48 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.6, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 260, damping: 18 }}
+      >
+        <div
+          className="font-pixel text-[40px] sm:text-[56px] leading-none"
+          style={{ color: "#ff2d55", textShadow: "4px 4px 0 #000, 0 0 32px #ff2d5588" }}
+        >
+          GAME OVER
+        </div>
+        <div
+          className="font-pixel text-[14px] sm:text-[18px] mt-3"
+          style={{ color: "#fff", textShadow: "2px 2px 0 #000" }}
+        >
+          USER GAME OVER
+        </div>
+        <div className="font-mono-pixel text-[15px] text-[var(--ink-dim)] mt-3">
+          Tes HP sont tombés à 0
+        </div>
+        <div className="font-mono-pixel text-[13px] text-[var(--neon-violet)] mt-1">
+          Lance un quiz pour récupérer des HP
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ── Logout confirmation overlay ── */
 function LogoutOverlay({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: () => void }) {
   return (
@@ -624,27 +684,48 @@ interface DashboardClientProps {
   pieces: number;
   lastDailyAt: string | null;
   dailyQuestsDone: number;
+  streak: number;
   badges: BadgeData[];
 }
 
-export default function DashboardClient({ playerName, isAdmin, niveau, xp: initXp, hp: initHp, pieces, lastDailyAt, dailyQuestsDone, badges }: DashboardClientProps) {
+export default function DashboardClient({ playerName, isAdmin, niveau, xp: initXp, hp: initHp, pieces, lastDailyAt, dailyQuestsDone, streak, badges }: DashboardClientProps) {
   const router = useRouter();
   const [totalXp, setTotalXp] = useState(initXp);
   const [hp, setHp] = useState(initHp);
   const hpMax = 5;
   const [coins, setCoins] = useState(pieces);
-  const streak = 0;
   const level = niveau;
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [showGameOverOverlay, setShowGameOverOverlay] = useState(false);
+
+ useEffect(() => {
+  if (hp === 0) {
+    // On décale légèrement l'apparition pour éviter le rendu en cascade
+    const showTimer = setTimeout(() => {
+      setShowGameOverOverlay(true);
+    }, 10);
+
+    // On cache l'overlay après le délai de l'animation
+    const hideTimer = setTimeout(() => {
+      setShowGameOverOverlay(false);
+    }, 3510); // 3500 + les 10ms de décalage
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }
+}, [hp]);
 
   const { xpInLevel } = niveauFromTotalXp(totalXp);
   const xpSeuil = xpThreshold(niveau);
 
-  const onAward = ({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {
+  // useCallback + functional updaters = stable reference even when parent re-renders
+  const onAward = useCallback(({ xp: dx = 0, coins: dc = 0, hp: dh = 0 }: AwardPayload) => {
     if (dx) setTotalXp((v) => v + dx);
     if (dc) setCoins((v) => v + dc);
     if (dh) setHp((v) => Math.max(0, Math.min(hpMax, v + dh)));
-  };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -699,6 +780,10 @@ export default function DashboardClient({ playerName, isAdmin, niveau, xp: initX
           onConfirm={handleLogout}
         />
       )}
+
+      <AnimatePresence>
+        {showGameOverOverlay && <GameOverOverlay key="game-over" />}
+      </AnimatePresence>
     </div>
   );
 }

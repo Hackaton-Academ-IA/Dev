@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { PixelBadge } from "@/components/ui/PixelIcons";
+import { badgeImageSrc } from "@/lib/game/badge-utils";
 
 interface Props {
   queue: string[]; // badge names, shown one at a time
@@ -49,7 +51,21 @@ export default function BadgePopup({ queue, onDismiss }: Props) {
           ✦ BADGE DÉBLOQUÉ !
         </div>
         <div className="flex items-center gap-4 p-4">
-          <PixelBadge kind="crown" size={44} />
+          {(() => {
+            const imgSrc = badgeImageSrc("crown");
+            return imgSrc ? (
+              <Image
+                src={imgSrc}
+                width={48}
+                height={48}
+                alt="Badge"
+                className="object-contain rounded-md"
+                style={{ imageRendering: "pixelated" }}
+              />
+            ) : (
+              <PixelBadge kind="crown" size={44} />
+            );
+          })()}
           <div>
             <div
               className="font-pixel text-[10px] text-[var(--gold)]"

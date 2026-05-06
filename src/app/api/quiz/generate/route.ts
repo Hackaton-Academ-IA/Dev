@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
+import { checkRateLimit, getClientKey } from "@/lib/rate-limit";
 
 const MATIERES = [
   "Mathématiques",
@@ -102,22 +106,12 @@ const FALLBACK_QUIZZES: Record<string, Omit<QuizData, "isAiOnline">> = {
   },
 };
 
-// Type étendu en attente de npx prisma generate après la migration SQL
-type QuestionRow = {
-  contenu: string;
-  choix: string[];
-  reponse_attendue: string;
-  explication: string;
-  matiere: string;
-};
-
 async function dbFallback(matiere: string): Promise<QuizData | null> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const questions = await (prisma.question as any).findMany({
+    const questions = await prisma.question.findMany({
       where: { matiere },
       select: { contenu: true, choix: true, reponse_attendue: true, explication: true, matiere: true },
-    }) as QuestionRow[];
+    });
 
     if (questions.length === 0) return null;
 
@@ -139,14 +133,26 @@ async function dbFallback(matiere: string): Promise<QuizData | null> {
 }
 
 export async function POST(req: Request) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const rlKey = session.user.id ?? getClientKey(req);
+  const rl = checkRateLimit(rlKey, 10, 10_000);
+  if (!rl.allowed) {
+    logger.warn("RATE_LIMIT_HIT", `userId=${session.user.id} route=quiz/generate`);
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
+
   const { theme, difficulty } = await req.json().catch(() => ({ theme: "default", difficulty: "5/10" }));
 
   const matiere = MATIERES[Math.floor(Math.random() * MATIERES.length)];
   const palier = getPalier(String(difficulty ?? "5/10"));
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+  const apiKey = process.env.GEMINI_API_KEY ?? "";
 
-  if (apiKey) {
+  if (!apiKey) {
+    logger.warn("GEMINI_API_KEY_MISSING", "Passage direct au fallback — vérifie .env");
+  } else {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
@@ -166,8 +172,10 @@ correctAnswer est l'index (0-3) de la bonne réponse.`;
         const quizData = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
         return NextResponse.json({ ...quizData, matiere, source: "gemini", isAiOnline: true });
       }
+
+      logger.error("GEMINI_INVALID_JSON", `JSON introuvable dans la réponse: ${text.slice(0, 100)}`);
     } catch (err) {
-      console.warn("[quiz/generate] Gemini failed, trying DB fallback:", err instanceof Error ? err.message : err);
+      logger.error("GEMINI_ERROR", err instanceof Error ? err.message : String(err));
     }
   }
 

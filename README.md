@@ -1,88 +1,97 @@
-# Academ’IA - Hackathon 2026
+# ACADEM'IA — The AI Learning RPG
 
-## La Vision
-**Academ’IA** est une plateforme d’apprentissage gamifiée pilotée par une IA adaptative. 
-Notre promesse ? **Une expérience personnalisée en temps réel qui s’adapte au niveau, au rythme et à la motivation de l’utilisateur.**
-
-### Le Moteur IA
-Notre IA n'est pas qu'un simple chatbot, c'est le maître du jeu qui :
-- Crée les questions sur mesure.
-- Adapte la difficulté en live (maintien de la "Zone de Flow").
-- Détecte les faiblesses de l'apprenant.
-- Propose des défis personnalisés pour surmonter les blocages.
-
-### La Gamification (L'Engagement)
-
-Pour transformer l'apprentissage en aventure, nous intégrons :
-- Un système de **Niveaux** (XP).
-- Des **Récompenses** (Badges, déblocages).
-- Une **Progression** visuelle et valorisante.
-
-## Stack Technique
-- **Frontend :** NextJS / TailwindCSS
-- **Backend :** NextJS API / Better-Auth
-- **Base de données :** PostgreSQL (via Docker)
-- **Tests :** Vitest
-
-## Architecture du projet
-Retrouvez tous nos schémas de conception dans le dossier `/architecture` :
-- **Flux de données :** [Voir le schéma](./architecture/architecture-flux-AcademIA.png)
-- **Modèle de données (BDD) :** [Voir le schéma](./architecture/bdd-schema-AcademIA.png)
-- **Cas d'utilisation :** [Voir le schéma](./architecture/use-case-AcademIA.png)
+> **"Learn. Level Up. Repeat."**  
+> Une plateforme d'apprentissage adaptative pilotée par l'IA, conçue en 48h pour le **Hackathon 2026**.
 
 ---
 
-## Installation en local
+## La Vision
+**Academ’IA** n'est pas un simple outil de quiz, c'est une aventure pédagogique. Notre moteur de jeu s'adapte en temps réel à l'apprenant pour garantir une progression constante sans frustration.
 
-Voici les étapes pour faire tourner le projet sur votre machine :
+> **Notre promesse :** Une expérience personnalisée qui s’adapte au niveau, au rythme et à la motivation de l’utilisateur pour le maintenir dans sa **"Zone de Flow"**.
 
-1. **Cloner le dépôt** :    
-   git clone [https://github.com/Hackaton-Academ-IA/Dev.git](https://github.com/Hackaton-Academ-IA/Dev.git)
+### Le Maître du Jeu (IA Engine)
+Notre IA (Gemini 2.0 Flash) agit comme un véritable *Game Master* :
+*   **Génération dynamique :** Création de questions sur mesure selon le contexte.
+*   **Difficulté Adaptative :** Ajustement du challenge en live selon les performances.
+*   **Analyse de données :** Détection des faiblesses et proposition de défis correctifs.
 
+### Gamification & Engagement
+*   **Progression RPG :** Gain d'XP et montée de niveaux.
+*   **Système de Loot :** Déblocage de badges et de récompenses exclusives.
+*   **Feedback Visuel :** Une interface valorisante pour transformer l'effort en plaisir.
 
-Configurer les variables d'environnement :
-Copiez le fichier d'exemple pour créer votre fichier local, puis remplissez les variables manquantes (comme l'URL de la base de données ou la clé API Gemini).
+---
 
+## Stack Technique
+
+| Secteur | Technologie |
+| :--- | :--- |
+| **Frontend** | Next.js 15/16 + TailwindCSS |
+| **Backend** | Next.js API Routes + Better-Auth |
+| **Base de données** | PostgreSQL (Prisma ORM) |
+| **Infrastructure** | Docker + Railway |
+| **IA** | Google Gemini API |
+| **Tests** | Vitest + GitHub Actions |
+
+---
+
+## Architecture du Projet
+Retrouvez nos schémas de conception détaillés dans le dossier `/architecture` :
+*   [**Flux de données**](./architecture/architecture-flux-AcademIA.png) : Cycle de vie d'une requête.
+*   [**Modèle de données (BDD)**](./architecture/bdd-schema-AcademIA.png) : Structure PostgreSQL/Prisma.
+*   [**Cas d'utilisation**](./architecture/use-case-AcademIA.png) : Parcours utilisateur et GM.
+
+---
+
+## Installation en Local
+
+1.  **Cloner le dépôt** :
+    ```bash
+    git clone [https://github.com/Hackaton-Academ-IA/Dev.git](https://github.com/Hackaton-Academ-IA/Dev.git)
+    cd Dev
+    ```
+
+2.  **Configuration** :
+    ```bash
     cp .env.example .env
+    # Remplissez les clés GEMINI_API_KEY et DATABASE_URL
+    ```
 
-Installer les dépendances :
-
+3.  **Installation & Lancement** :
+    ```bash
     npm install
+    docker-compose up -d  # Lance la BDD PostgreSQL
+    npx prisma db push    # Synchronise le schéma
+    npm run dev
+    ```
+    Accès : `http://localhost:3000`
 
-Lancer la base de données (PostgreSQL) :
-Assurez-vous que Docker Desktop est bien démarré sur votre machine, puis exécutez :
+---
 
-    docker-compose up -d
+## Coulisses Techniques (Jalons de Dev)
 
-Démarrer le serveur de développement :
+### 📍 Jalon 2 : Structure & Discipline
+*   **Modularité :** Architecture Next.js 16 avec séparation stricte (API, Components, Lib).
+*   **Documentation :** Intégration de **Scalar** pour une documentation API interactive.
+*   **Workflow :** Discipline Git avec commits atomiques et déploiement continu.
 
-npm run dev
-Le projet sera alors accessible sur http://localhost:3000 en local sur l'une des machines des développeurs.
+### 📍 Jalon 3 : Robustesse & Résilience
+*   **Failsafe :** Gestion d'erreurs globale (`try/catch`) et messages UX normalisés.
+*   **Traçabilité :** Logger centralisé (`src/lib/logger.ts`) capturant les actions critiques (Auth, XP, Quiz).
+*   **Qualité :** Automatisation des tests via **Vitest** et GitHub Actions.
 
+### 📍 Jalon 4 : Sécurité, UX & Finitions
+*   **Sécurité :** 
+    *   *Rate Limiting* (Anti-spam API).
+    *   *Validation HMAC* pour empêcher la triche sur les réponses en inspectant le réseau.
+*   **Performance :** Correction des *cascading renders* pour un Dashboard fluide.
+*   **Identité :** Intégration du Favicon, polissage des animations (Game Over Overlay) et design Pixel Art.
+*   **Conformité :** Pages légales (CGU/RGPD) intégrées, prêtes pour la production.
 
+---
 
-## Coulisses Techniques : Jalons de Développement
-
-Le projet Academ'IA suit une méthodologie itérative rigoureuse.
-
-### Jalon 2 : Structure & Discipline
-
-*   **Modularité & Organisation** : Architecture Next.js 16 avec séparation stricte :
-    *   `/src/app/api` : Logique backend isolée.
-    *   `/src/components` : UI atomique et Pixel Art CSS.
-    *   `/src/lib` : Cœur technologique (Auth, Database, Logger).
-*   **Documentation API** : Intégration de **Scalar** pour une documentation interactive et testable.
-*   **Discipline Git** : Commits atomiques réguliers (trace claire de l'évolution).
-*   **Déploiement** : Instance locale accessible sur le réseau `EXPERNET_SALLE_LA_FOURNAISE`.
-
-### Jalon 3 : Robustesse & Résilience
-
-*   **Gestion d'erreurs (Failsafe)** :
-    *   Blocs `try/catch` globaux sur les Server Actions et API.
-    *   Messages d'erreurs normalisés pour l'utilisateur (UX résiliente).
-*   **Traçabilité (Logs ISO)** : Système de logging centralisé (`src/lib/logger.ts`) capturant les actions critiques (Auth, Quiz, XP) pour audit sécurité.
-*   **Santé du Code** :
-    *   **Refactoring** : Suppression du code mort et optimisation des imports.
-*   **Automatisation** : Les tests sont réalisés avec **Vitest** pour garantir la stabilité des fonctionnalités critiques (Auth, Quiz, XP). Les test sont automatisés grâce à un GitHub Actions. Pour les effectuer, utilisez la commande :
-
-    npm run test
+## Tests
+Pour garantir la stabilité des fonctionnalités critiques :
+```bash
+npm run test

@@ -1,4 +1,10 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "CGU · ACADEM'IA",
+  description: "Conditions Générales d'Utilisation de la plateforme ACADEM'IA.",
+};
 
 function Article({
   num,
@@ -67,7 +73,7 @@ export default function CGUPage() {
 
             {/* Header */}
             <div className="space-y-2">
-              <p className="font-pixel text-[9px] text-[var(--elec-blue)]">▶ CONDITIONS GÉNÉRALES</p>
+              <p className="font-pixel text-[9px] text-[var(--elec-blue)]">▶ CONDITIONS GÉNÉRALES D&apos;UTILISATION</p>
               <h1 className="font-pixel text-[18px] sm:text-[22px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
                 CGU · RÈGLES DU JEU
               </h1>
@@ -85,13 +91,11 @@ export default function CGUPage() {
                 l&apos;utilisation de la plateforme ACADEM&apos;IA, accessible à l&apos;adresse academ-ia.tech.
               </p>
               <p>
-                ACADEM&apos;IA est une plateforme d&apos;apprentissage gamifiée utilisant l&apos;intelligence
-                artificielle pour générer des quêtes pédagogiques adaptatives. Elle s&apos;adresse aux
-                apprenants individuels et aux organisations éducatives.
+                ACADEM&apos;IA est une plateforme d&apos;apprentissage gamifiée <span className="text-[var(--ink)]">sous la forme d&apos;un jeu 2D</span> utilisant
+                l&apos;intelligence artificielle pour générer des quêtes pédagogiques adaptatives.
               </p>
               <p>
                 L&apos;utilisation du service implique l&apos;acceptation pleine et entière des présentes CGU.
-                Toute utilisation contraire aux présentes entraîne la résiliation immédiate du compte.
               </p>
             </Article>
 
@@ -103,90 +107,107 @@ export default function CGUPage() {
                 <p className="font-pixel text-[10px] text-[var(--emerald)]">▶ MODE STARTER (GRATUIT)</p>
                 <Bullet color="var(--emerald)">Accès illimité aux quêtes de niveau Initié.</Bullet>
                 <Bullet color="var(--emerald)">Tableau de bord personnel avec suivi de progression.</Bullet>
-                <Bullet color="var(--emerald)">3 badges déblocables.</Bullet>
                 <Bullet color="var(--emerald)">Pas de carte bancaire requise.</Bullet>
               </div>
 
               <div className="panel border-4 border-black p-4 space-y-2 mt-2">
                 <p className="font-pixel text-[10px] text-[var(--gold)]">★ MODE HÉROS (PREMIUM)</p>
-                <Bullet color="var(--gold)">Accès à toutes les difficultés (Initié → Légendaire).</Bullet>
-                <Bullet color="var(--gold)">Génération IA illimitée de quêtes personnalisées.</Bullet>
-                <Bullet color="var(--gold)">Classements de guilde et modes multijoueur.</Bullet>
+                <Bullet color="var(--gold)">Accès à toutes les difficultés et génération IA illimitée.</Bullet>
+                <Bullet color="var(--gold)">Suivi des statistiques complet.</Bullet>
                 <Bullet color="var(--gold)">Résiliation possible à tout moment, sans frais.</Bullet>
               </div>
-
-              <p>
-                ACADEM&apos;IA se réserve le droit de modifier les fonctionnalités incluses dans chaque
-                niveau avec un préavis de 30 jours par email.
-              </p>
             </Article>
 
-            {/* Article 3 — Fair-play */}
-            <Article num="ART. 03" color="var(--hot-pink)" title="RÈGLES DE FAIR-PLAY">
+            {/* Article 3 — Fair-play et modération */}
+            <Article num="ART. 03" color="var(--hot-pink)" title="RÈGLES DE FAIR-PLAY ET MODÉRATION">
               <p>
-                ACADEM&apos;IA repose sur la confiance et l&apos;équité entre joueurs.
-                Les comportements suivants sont <span className="text-[var(--danger)]">strictement interdits</span> :
+                ACADEM&apos;IA repose sur la confiance et l&apos;équité entre joueurs. L&apos;objectif est de maintenir
+                un classement (high score) juste. Les comportements suivants sont{" "}
+                <span className="text-[var(--danger)]">strictement interdits</span> :
               </p>
 
               <div className="border-4 border-[var(--danger)] p-4 space-y-2 bg-[#1a0408]">
                 <p className="font-pixel text-[9px] text-[var(--danger)]">⚠ COMPORTEMENTS BANNIS</p>
                 <Bullet color="var(--danger)">
-                  <strong className="text-[var(--ink)]">Bots & automatisation :</strong> l&apos;utilisation de scripts,
-                  programmes ou IA tierces pour répondre aux quêtes à votre place est prohibée.
+                  <strong className="text-[var(--ink)]">Bots & automatisation :</strong> l&apos;utilisation de scripts
+                  ou d&apos;IA tierces pour répondre aux quêtes.
                 </Bullet>
                 <Bullet color="var(--danger)">
-                  <strong className="text-[var(--ink)]">Manipulation du high score :</strong> toute tentative de
-                  falsifier, d&apos;injecter ou de modifier frauduleusement ses scores est interdite.
+                  <strong className="text-[var(--ink)]">Exploitation de bugs :</strong> toute utilisation volontaire
+                  d&apos;une faille du jeu pour s&apos;enrichir (Coins, XP).
                 </Bullet>
                 <Bullet color="var(--danger)">
-                  <strong className="text-[var(--ink)]">Partage de comptes :</strong> un compte = un joueur.
-                  Le partage d&apos;identifiants entre plusieurs personnes est interdit.
+                  <strong className="text-[var(--ink)]">Comportements toxiques :</strong> l&apos;utilisation de pseudonymes
+                  injurieux, discriminatoires ou hors charte.
                 </Bullet>
                 <Bullet color="var(--danger)">
-                  <strong className="text-[var(--ink)]">Reverse engineering :</strong> toute tentative de décompilation
-                  ou d&apos;accès non autorisé aux API est prohibée.
+                  <strong className="text-[var(--ink)]">Manipulation du high score :</strong> toute tentative
+                  de falsifier ses scores.
                 </Bullet>
               </div>
 
-              <p>
-                Toute infraction constatée entraîne la <span className="text-[var(--danger)]">suspension immédiate</span> du
-                compte, sans remboursement. Les scores frauduleux seront retirés des classements.
-              </p>
-              <p>
-                Pour signaler une tricherie :{" "}
-                <a href="mailto:contact@academ-ia.tech" className="text-[var(--elec-blue)] hover:text-white">
-                  contact@academ-ia.tech
-                </a>
-              </p>
+              <div className="border-4 border-[var(--gold)] p-4 space-y-2 bg-[#1a1200] mt-2">
+                <p className="font-pixel text-[9px] text-[var(--gold)]">⚠ DROIT DE SANCTION</p>
+                <p>
+                  En cas de non-respect de ces règles, l&apos;administration d&apos;ACADEM&apos;IA se réserve le droit
+                  d&apos;appliquer les sanctions suivantes, sans préavis :
+                </p>
+                <Bullet color="var(--gold)">
+                  <strong className="text-[var(--ink)]">Pénalités en jeu :</strong> réduction de vos points de vie (HP)
+                  ou annulation de vos gains.
+                </Bullet>
+                <Bullet color="var(--gold)">
+                  <strong className="text-[var(--ink)]">Verrouillage IA :</strong> blocage temporaire de la génération
+                  de quêtes pendant 24h.
+                </Bullet>
+                <Bullet color="var(--danger)">
+                  <strong className="text-[var(--ink)]">User Game Over :</strong> suppression pure et simple du compte
+                  fautif par un administrateur et retrait définitif des classements.
+                </Bullet>
+              </div>
             </Article>
 
-            {/* Article 4 — As-Is */}
-            <Article num="ART. 04" color="var(--gold)" title='CLAUSE "AS-IS" · PROTOTYPE 48H'>
-              <div className="border-4 border-[var(--gold)] p-4 bg-[#1a1200] space-y-2">
-                <p className="font-pixel text-[9px] text-[var(--gold)]">★ AVERTISSEMENT PROTOTYPE</p>
+            {/* Article 4 — IA Gemini */}
+            <Article num="ART. 04" color="var(--emerald)" title="L&apos;INTELLIGENCE ARTIFICIELLE (GEMINI)">
+              <p>
+                ACADEM&apos;IA intègre un système d&apos;Intelligence Artificielle générative pour créer
+                des défis sur mesure.
+              </p>
+
+              <div className="panel border-4 border-black p-4 space-y-2 mt-2">
+                <p className="font-pixel text-[9px] text-[var(--emerald)]">◆ DISCLAIMER IA</p>
                 <p>
-                  ACADEM&apos;IA est actuellement un <span className="text-[var(--gold)]">prototype développé en 48 heures</span> dans
-                  le cadre d&apos;un hackathon académique. La plateforme est fournie <strong className="text-[var(--ink)]">« en l&apos;état »
-                  (as-is)</strong> sans garantie de disponibilité continue, d&apos;exactitude des contenus IA,
-                  ni de persistence des données.
+                  Les questions du &quot;Défi de l&apos;IA&quot; sont générées de manière automatisée. Bien que nous visions
+                  l&apos;excellence pédagogique, l&apos;équipe d&apos;ACADEM&apos;IA décline toute responsabilité en cas
+                  d&apos;erreurs factuelles (hallucinations), d&apos;inexactitudes ou de contenus inattendus générés
+                  par l&apos;IA. Vérifiez toujours vos connaissances avec des sources officielles.
                 </p>
               </div>
 
-              <p>
-                L&apos;équipe ACADEM&apos;IA ne saurait être tenue responsable :
-              </p>
-              <Bullet color="var(--ink-dim)">Des interruptions de service liées à l&apos;infrastructure de prototype.</Bullet>
-              <Bullet color="var(--ink-dim)">De la perte de données ou de progression dans le cadre de la phase de test.</Bullet>
-              <Bullet color="var(--ink-dim)">Des inexactitudes dans les contenus générés par l&apos;IA (toujours vérifier avec vos sources officielles).</Bullet>
-              <Bullet color="var(--ink-dim)">Des incompatibilités avec certains navigateurs ou appareils en phase beta.</Bullet>
+              <div className="panel border-4 border-black p-4 space-y-2 mt-2">
+                <p className="font-pixel text-[9px] text-[var(--elec-blue)]">◆ PARTAGE DE DONNÉES</p>
+                <p>
+                  Lors de la création d&apos;une &quot;Nouvelle quête&quot;, les thèmes et les données de requêtes sont
+                  transmis à l&apos;API de Google (Gemini).{" "}
+                  <span className="text-[var(--ink)]">Aucune donnée personnelle identifiante (nom, e-mail) n&apos;est
+                  transmise à ces services tiers.</span>
+                </p>
+              </div>
+            </Article>
 
-              <p>
-                L&apos;utilisation du service pendant la phase prototype est volontaire et gratuite.
-                En continuant, vous acceptez les limitations inhérentes à un produit en cours de développement.
-              </p>
-              <p className="font-pixel text-[9px] text-[var(--ink-dim)]">
-                VERSION CIBLE STABLE : Q3 2026
-              </p>
+            {/* Article 5 — As-Is */}
+            <Article num="ART. 05" color="var(--gold)" title='CLAUSE "AS-IS" · PROTOTYPE 48H'>
+              <div className="border-4 border-[var(--gold)] p-4 bg-[#1a1200] space-y-2">
+                <p className="font-pixel text-[9px] text-[var(--gold)]">★ AVERTISSEMENT PROTOTYPE</p>
+                <p>
+                  ACADEM&apos;IA est un prototype développé en{" "}
+                  <span className="text-[var(--gold)]">48 heures</span> dans le cadre d&apos;un sprint / hackathon.
+                  La plateforme est fournie{" "}
+                  <strong className="text-[var(--ink)]">« en l&apos;état » (as-is)</strong> sans garantie de
+                  disponibilité continue ni de persistance des données. En continuant, vous acceptez les
+                  limitations inhérentes à un produit expérimental.
+                </p>
+              </div>
             </Article>
 
             {/* Acceptance */}
@@ -208,6 +229,14 @@ export default function CGUPage() {
                 &nbsp;·&nbsp;{" "}
                 <Link href="/legal/mentions" className="text-[var(--elec-blue)] hover:text-white">
                   Mentions légales
+                </Link>
+                &nbsp;·&nbsp;{" "}
+                <Link href="/legal/confidentialite" className="text-[var(--neon-violet)] hover:text-white">
+                  Confidentialité
+                </Link>
+                &nbsp;·&nbsp;{" "}
+                <Link href="/legal/cgv" className="text-[var(--gold)] hover:text-white">
+                  CGV
                 </Link>
               </p>
             </div>

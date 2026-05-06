@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 // GET — returns the user's dunjon progression statuses
 export async function GET() {
@@ -24,9 +25,10 @@ export async function GET() {
     // Dunjon 1 is always accessible for new users
     if (!statuses[1]) statuses[1] = "UNLOCKED";
 
+    logger.info("PROGRESSION_FETCHED", `userId=${session.user.id} donjons=${rows.length}`);
     return NextResponse.json({ statuses });
   } catch (err) {
-    console.error("[game/progression GET]", err);
+    logger.error("GAME_PROGRESSION_ERROR", err instanceof Error ? err.message : String(err));
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }

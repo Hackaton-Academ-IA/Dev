@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CoinIcon } from "@/components/ui/PixelIcons";
+import Image from "next/image";
 
 function Ticker() {
   return (
@@ -73,10 +73,14 @@ function FinalCTA() {
           </div>
         </div>
         <div className="flex justify-center">
-          <div className="relative">
-            <CoinIcon size={120} />
-            <div className="absolute inset-0 flex items-center justify-center font-pixel text-[8px] text-black">1UP</div>
-          </div>
+          <Image
+            src="/images/icon-robot.jpg"
+            alt="Robot ACADEM'IA"
+            width={120}
+            height={120}
+            className="rounded-xl shadow-lg object-contain"
+            style={{ imageRendering: "pixelated", boxShadow: "0 0 24px rgba(177,75,255,0.45)" }}
+          />
         </div>
       </div>
     </section>
@@ -84,19 +88,20 @@ function FinalCTA() {
 }
 
 function FooterLinks() {
-  const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
   return (
     <footer className="panel mt-2">
       <div className="grid sm:grid-cols-[1.2fr_1fr_1fr_1fr] gap-5 p-5">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-[28px] h-[28px] grid grid-cols-8 grid-rows-8 border-2 border-black">
-              {["vvvvvvvv","vKKKvKKv","vKbKvKvv","vKKKvKvv","vKbKvKvv","vKbKvKvv","vvvvvvvv","eeeeeeee"].map((row, y) =>
-                row.split("").map((ch, x) => <div key={`${x}-${y}`} style={{ background: colorMap[ch] }} />)
-              )}
-            </div>
-            <div className="font-pixel text-[12px] glow-violet">ACADEM<span style={{ color: "#1eea7c" }}>&apos;</span>IA</div>
-          </div>
+          <Link href="/">
+            <Image
+              src="/images/logo-blanc.png"
+              alt="ACADEM'IA"
+              width={110}
+              height={34}
+              className="object-contain"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </Link>
           <p className="font-mono-pixel text-[16px] text-[var(--ink-dim)] mt-3 max-w-[36ch]">
             L&apos;apprentissage en mode arcade. Une IA, mille quêtes, votre niveau.
           </p>
@@ -116,6 +121,7 @@ function FooterLinks() {
           ]},
           { h: "LÉGAL", links: [
             { l: "CGU",             href: "/legal/cgu"             },
+            { l: "CGV",             href: "/legal/cgv"             },
             { l: "Confidentialité", href: "/legal/confidentialite" },
             { l: "Mentions",        href: "/legal/mentions"        },
             { l: "Cookies",         href: "/legal/cookies"         },

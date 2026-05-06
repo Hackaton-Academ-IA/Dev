@@ -32,6 +32,7 @@ export default async function DashboardPage() {
         pieces: true,
         lastDailyAt: true,
         dailyQuestsDone: true,
+        streak: true,
         role: true,
         badges: {
           select: {
@@ -78,6 +79,7 @@ export default async function DashboardPage() {
         pieces={utilisateur?.pieces ?? 0}
         lastDailyAt={utilisateur?.lastDailyAt?.toISOString() ?? null}
         dailyQuestsDone={dailyQuestsDone}
+        streak={utilisateur?.streak ?? 0}
         badges={badges}
       />
     </div>

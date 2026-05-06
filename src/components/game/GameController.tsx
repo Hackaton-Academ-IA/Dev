@@ -325,7 +325,7 @@ export default function GameController() {
               "⚔  Boss toutes les 5 questions",
               "🔥  Combo x3 → +20 XP bonus",
               "⚡  Rapidité → +5 XP bonus",
-              "💀  3 HP — Game Over si 0",
+              "💀  5 HP — Game Over si 0",
             ].map((line) => <div key={line}>{line}</div>)}
           </div>
           <button className="arcade arcade-emerald text-[11px] mt-2" onClick={startGame}>

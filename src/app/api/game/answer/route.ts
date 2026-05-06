@@ -15,6 +15,18 @@ import {
 } from "@/lib/game/engine";
 import { DUNGEON_COUNT } from "@/lib/game/constants";
 import { checkAndUnlockBadges } from "@/lib/game/badges";
+import { logger } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+function computeDailyStreak(currentStreak: number, lastPlayedAt: Date | null): number {
+  if (!lastPlayedAt) return 1;
+  const now = new Date();
+  const msSince = now.getTime() - lastPlayedAt.getTime();
+  const hoursSince = msSince / (1000 * 60 * 60);
+  if (hoursSince < 24) return currentStreak; // already played today
+  if (hoursSince < 48) return currentStreak + 1; // yesterday — extend streak
+  return 1; // gap too large — reset
+}
 
 // GET — current XP state for the HUD progress bar
 export async function GET() {
@@ -36,7 +48,7 @@ export async function GET() {
       xpSeuil: xpThreshold(user.niveau),
     });
   } catch (err) {
-    console.error("[game/answer GET]", err);
+    logger.error("GAME_ANSWER_ERROR", err instanceof Error ? err.message : String(err));
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }
@@ -44,6 +56,12 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  const rl = checkRateLimit(session.user.id, 10, 10_000);
+  if (!rl.allowed) {
+    logger.warn("RATE_LIMIT_HIT", `userId=${session.user.id} route=game/answer`);
+    return NextResponse.json({ error: "too_many_requests" }, { status: 429 });
+  }
 
   const body = await req.json().catch(() => null);
 
@@ -54,7 +72,7 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.utilisateur.findUnique({
       where: { id: userId },
-      select: { xp: true, niveau: true },
+      select: { xp: true, niveau: true, streak: true, lastPlayedAt: true },
     });
     if (!user) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
 
@@ -62,9 +80,11 @@ export async function POST(req: NextRequest) {
     const { niveau: newNiveau, xpInLevel } = niveauFromTotalXp(newTotalXp);
     const leveledUp = newNiveau > user.niveau;
 
+    const newStreak = computeDailyStreak(user.streak, user.lastPlayedAt);
+
     await prisma.utilisateur.update({
       where: { id: userId },
-      data: { xp: newTotalXp, niveau: newNiveau },
+      data: { xp: newTotalXp, niveau: newNiveau, streak: newStreak, lastPlayedAt: new Date() },
     });
 
     // Optional dunjon progression — mark COMPLETED and unlock next
@@ -75,6 +95,7 @@ export async function POST(req: NextRequest) {
         create: { userId, donjonId, status: "COMPLETED" },
         update: { status: "COMPLETED" },
       });
+      logger.info("DONJON_COMPLETED", `userId=${userId} donjonId=${donjonId}`);
       // Unlock next dunjon without downgrading if already COMPLETED
       if (donjonId < DUNGEON_COUNT) {
         await prisma.donjonProgression.upsert({
@@ -90,6 +111,7 @@ export async function POST(req: NextRequest) {
       niveau: newNiveau,
       xpSeuil: xpThreshold(newNiveau),
       leveledUp,
+      streak: newStreak,
     });
   }
   // ─────────────────────────────────────────────────────────────────────────
@@ -109,7 +131,7 @@ export async function POST(req: NextRequest) {
   // 2. Fetch authoritative player state from DB
   const user = await prisma.utilisateur.findUnique({
     where: { id: userId },
-    select: { xp: true, niveau: true, hp: true, lastDailyAt: true, dailyQuestsDone: true },
+    select: { xp: true, niveau: true, hp: true, lastDailyAt: true, dailyQuestsDone: true, streak: true, lastPlayedAt: true },
   });
   if (!user) return NextResponse.json({ error: "user_not_found" }, { status: 404 });
 
@@ -121,6 +143,7 @@ export async function POST(req: NextRequest) {
     const damage = correct ? (data.combo >= 3 ? 2 : 1) : 0;
     newBossHp = Math.max(0, newBossHp - damage);
     bossDefeated = newBossHp === 0;
+    if (bossDefeated) logger.info("BOSS_DEFEATED", `userId=${userId} bossHp was ${data.bossHp}`);
   }
 
   // 4. Streaks & combo
@@ -145,6 +168,7 @@ export async function POST(req: NextRequest) {
   const prevDailyDone = isNewDay ? 0 : user.dailyQuestsDone;
   const newDailyQuestsDone = Math.min(5, prevDailyDone + 1);
   const dailyCompleted = newDailyQuestsDone === 5 && prevDailyDone < 5;
+  if (dailyCompleted) logger.info("DAILY_QUEST_COMPLETED", `userId=${userId} +200 XP`);
   const dailyBonusXp = dailyCompleted ? 200 : 0;
 
   const newXp = user.xp + xpGain + dailyBonusXp;
@@ -163,6 +187,7 @@ export async function POST(req: NextRequest) {
   const newCorrect = data.correctAnswers + (correct ? 1 : 0);
   // Reward: 5 pièces per correct answer, +25 bonus on boss defeat
   const piecesGain = correct ? (bossDefeated ? 30 : 5) : 0;
+  const newDailyStreak = computeDailyStreak(user.streak, user.lastPlayedAt);
 
   await prisma.$transaction(async (tx) => {
     await tx.utilisateur.update({
@@ -173,6 +198,8 @@ export async function POST(req: NextRequest) {
         hp: newHp,
         dailyQuestsDone: newDailyQuestsDone,
         lastDailyAt: new Date(),
+        streak: newDailyStreak,
+        lastPlayedAt: new Date(),
         ...(piecesGain > 0 && { pieces: { increment: piecesGain } }),
       },
     });

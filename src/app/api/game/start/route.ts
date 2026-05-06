@@ -21,6 +21,14 @@ export async function POST() {
 
   const niveau = user?.niveau ?? 1;
   const palier = initialPalier(niveau);
+
+  // Restore HP when player comes back after a Game Over (HP ≤ 0 in DB)
+  let startHp = user?.hp ?? 5;
+  if (startHp <= 0) {
+    startHp = 3;
+    await prisma.utilisateur.update({ where: { id: session.user.id }, data: { hp: startHp } });
+  }
+
   const { question, token } = await generateQuestion(MATIERES[0], difficulteFromPalier(palier));
 
   // Effective daily count — reset at calendar midnight
@@ -37,7 +45,7 @@ export async function POST() {
     playerState: {
       niveau,
       xp: user?.xp ?? 0,
-      hp: user?.hp ?? 3,
+      hp: startHp,
       pieces: user?.pieces ?? 0,
       dailyQuestsDone,
     },

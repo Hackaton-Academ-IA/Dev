@@ -1,32 +1,39 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
 export default function NavBar() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
-  const colorMap: Record<string, string> = { v: "#1a1233", K: "#fff", b: "#b14bff", e: "#1eea7c" };
 
   return (
     <header className="panel panel-violet sticky top-3 z-40">
       <div className="flex items-center justify-between p-3 sm:p-4 gap-3">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-[44px] h-[44px] grid grid-cols-8 grid-rows-8 border-4 border-black"
-            style={{ boxShadow: "0 4px 0 #000, inset 0 0 0 2px #2c0f4d" }}
-          >
-            {["vvvvvvvv","vKKKvKKv","vKbKvKvv","vKKKvKvv","vKbKvKvv","vKbKvKvv","vvvvvvvv","eeeeeeee"].map((row, y) =>
-              row.split("").map((ch, x) => (
-                <div key={`${x}-${y}`} style={{ background: colorMap[ch] }} />
-              ))
-            )}
+        
+        <Link href="/" className="flex items-center gap-3 md:gap-4 hover:opacity-80 transition-opacity">
+          <Image
+            src="/images/logo-blanc.png"
+            alt="Logo ACADEM'IA"
+            width={120}
+            height={80}
+            style={{ imageRendering: "pixelated" }}
+            priority
+          />
+          <div className="flex flex-col justify-center">
+            <span
+              className="font-pixel text-white text-xs sm:text-sm tracking-widest"
+              style={{ textShadow: "0 0 8px rgba(168, 85, 247, 0.8)" }}
+            >
+              ACADEM<span className="text-[#00ff9d]">&apos;</span>IA
+            </span>
+            <span className="font-pixel text-[7px] sm:text-[8px] text-[var(--ink-dim)] mt-1.5 hidden sm:block">
+              &gt; LEARN. LEVEL UP. REPEAT.
+            </span>
           </div>
-          <div className="font-pixel text-[14px] sm:text-[18px] glow-violet leading-none">
-            ACADEM<span style={{ color: "#1eea7c" }}>&apos;</span>IA
-          </div>
-        </div>
+        </Link>
 
         <nav className="hidden md:flex items-center gap-1">
           {[["#concept","CONCEPT"],["#cibles","CLASSES"],["#tarifs","TARIFS"],["#faq","FAQ"]].map(([href, label]) => (

@@ -23,7 +23,7 @@ services:
     environment:
       # On reconstruit l'URL pour Prisma en utilisant les variables du .env
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      NEXT_PUBLIC_GEMINI_API_KEY: ${NEXT_PUBLIC_GEMINI_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL}
     # S'assure que la DB est prête avant de lancer l'app

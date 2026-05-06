@@ -25,6 +25,15 @@ function Highlight({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Bullet({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <li className="flex gap-3 items-start">
+      <span className="mt-[6px] w-3 h-3 border-2 border-black flex-none" style={{ background: color }} />
+      <span>{children}</span>
+    </li>
+  );
+}
+
 export default function ConfidentialitePage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -50,7 +59,7 @@ export default function ConfidentialitePage() {
             <span className="font-pixel text-[10px] text-white" style={{ textShadow: "2px 2px 0 #000" }}>
               ◆ POLITIQUE DE CONFIDENTIALITÉ
             </span>
-            <span className="font-mono-pixel text-[16px] text-white/70">MAJ : 2026-05-05</span>
+            <span className="font-mono-pixel text-[16px] text-white/70">MAJ : 2026-05-06</span>
           </div>
 
           <div className="p-5 sm:p-8 space-y-8">
@@ -58,91 +67,86 @@ export default function ConfidentialitePage() {
             {/* Intro */}
             <p className="font-mono-pixel text-[18px] sm:text-[20px] text-[var(--ink-dim)] leading-snug">
               <span className="text-[var(--emerald)]">&gt; </span>
-              ACADEM&apos;IA s&apos;engage à protéger vos données personnelles conformément au RGPD
-              (Règlement UE 2016/679). Le présent document décrit quelles données sont collectées,
-              pourquoi, et comment vous pouvez exercer vos droits.
+              ACADEM&apos;IA s&apos;engage à protéger vos données personnelles conformément au RGPD.
             </p>
 
             <div className="pix-div" />
 
+            {/* Art 1 */}
             <Article num="ART. 1" title="RESPONSABLE DU TRAITEMENT">
               <p>ACADEM&apos;IA — équipe projet Hackathon Academ&apos;IA.</p>
-              <p>Contact DPO : <span className="text-[var(--elec-blue)]">privacy@academIA.fr</span></p>
-              <p>Hébergement : Vercel Inc., serveurs localisés dans l&apos;Union Européenne.</p>
+              <p>
+                Contact DPO :{" "}
+                <a href="mailto:privacy@academ-ia.tech" className="text-[var(--elec-blue)] hover:text-white transition-colors">
+                  privacy@academ-ia.tech
+                </a>
+              </p>
             </Article>
 
             <div className="pix-div" />
 
+            {/* Art 2 */}
             <Article num="ART. 2" title="DONNÉES COLLECTÉES">
-              <p>Nous collectons uniquement les données strictement nécessaires au fonctionnement du service :</p>
-              <ul className="space-y-1 mt-2">
-                {[
-                  "Compte : adresse e-mail, pseudonyme, mot de passe haché (bcrypt).",
-                  "Progression pédagogique : scores, streaks, temps de session, réponses aux quêtes.",
-                  "Technique : adresse IP (anonymisée après 24h), user-agent, journaux d'erreurs.",
-                  "Paiement : référence de transaction uniquement (aucun numéro de carte stocké — géré par Stripe).",
-                ].map((item, i) => (
-                  <li key={i} className="flex gap-3 items-start">
-                    <span className="mt-[6px] w-3 h-3 border-2 border-black bg-[var(--neon-violet)] flex-none" />
-                    <span>{item}</span>
-                  </li>
-                ))}
+              <p>
+                Nous collectons uniquement les données strictement nécessaires au fonctionnement
+                du service et à la boucle de gameplay :
+              </p>
+              <ul className="space-y-2 mt-2">
+                <Bullet color="var(--neon-violet)">
+                  <strong className="text-[var(--ink)]">Compte :</strong>{" "}
+                  adresse e-mail, pseudonyme, mot de passe haché (bcrypt).
+                </Bullet>
+                <Bullet color="var(--neon-violet)">
+                  <strong className="text-[var(--ink)]">Profilage et jeu :</strong>{" "}
+                  niveau actuel, points d&apos;expérience (XP), points de vie (HP), monnaie virtuelle (Coins),
+                  série de connexions (streak), dates d&apos;activité précises (lastDailyAt, hpRegenAt),
+                  historique des scores et réponses.
+                </Bullet>
+                <Bullet color="var(--neon-violet)">
+                  <strong className="text-[var(--ink)]">Technique :</strong>{" "}
+                  adresse IP (anonymisée), user-agent.
+                </Bullet>
               </ul>
             </Article>
 
             <div className="pix-div" />
 
-            <Article num="ART. 3" title="TRAITEMENT PAR L'IA — GOOGLE GEMINI">
-              <p>
-                Pour générer les quêtes adaptatives,{" "}
-                <Highlight>seules les données de progression brutes (réponses, scores, temps de réponse) sont transmises à l&apos;API Google Gemini.</Highlight>
-              </p>
-              <p className="mt-2">
-                <Highlight>Aucune information personnelle identifiable (nom, e-mail, adresse IP) n&apos;est incluse dans ces requêtes.</Highlight>{" "}
-                Les données envoyées à Gemini sont pseudonymisées via un identifiant de session temporaire.
-              </p>
-              <p className="mt-2">
-                Google LLC traite ces données en tant que sous-traitant au sens de l&apos;Art. 28 RGPD.
-                Consultez la{" "}
-                <span className="text-[var(--elec-blue)]">politique Google Cloud Privacy</span>{" "}
-                pour les conditions d&apos;utilisation de l&apos;API Gemini.
-              </p>
-            </Article>
-
-            <div className="pix-div" />
-
-            <Article num="ART. 4" title="CONSERVATION DES DONNÉES">
-              <ul className="space-y-1">
-                {[
-                  { label: "Données de compte :", value: "durée de l'abonnement actif." },
-                  { label: "Après résiliation :", value: <Highlight>suppression automatique sous 30 jours.</Highlight> },
-                  { label: "Progression pédagogique :", value: "conservée pendant la durée du compte, exportable à tout moment." },
-                  { label: "Journaux techniques :", value: <><Highlight>30 jours glissants</Highlight>{" "}— purge automatique au-delà.</> },
-                  { label: "Données de paiement :", value: "10 ans (obligation légale comptable)." },
-                ].map((row, i) => (
-                  <li key={i} className="flex flex-wrap gap-2 items-start">
-                    <span className="text-white font-mono-pixel">{row.label}</span>
-                    <span>{row.value}</span>
-                  </li>
-                ))}
+            {/* Art 3 */}
+            <Article num="ART. 3" title="CONSERVATION DES DONNÉES ET INACTIVITÉ">
+              <ul className="space-y-2">
+                <li className="flex flex-wrap gap-2 items-start">
+                  <span className="text-white font-mono-pixel">Données de compte et de jeu :</span>
+                  <span>Conservées pendant toute la durée d&apos;utilisation active du service.</span>
+                </li>
+                <li className="flex flex-wrap gap-2 items-start">
+                  <span className="text-white font-mono-pixel">Règle d&apos;inactivité :</span>
+                  <span>
+                    En cas d&apos;inactivité prolongée du joueur pendant une durée de{" "}
+                    <Highlight>deux (2) ans</Highlight>, le compte et l&apos;intégralité des statistiques de jeu
+                    seront automatiquement supprimés ou totalement anonymisés, conformément à la
+                    réglementation européenne.
+                  </span>
+                </li>
               </ul>
             </Article>
 
             <div className="pix-div" />
 
-            <Article num="ART. 5" title="VOS DROITS">
+            {/* Art 4 */}
+            <Article num="ART. 4" title="VOS DROITS (DROIT À L&apos;OUBLI)">
               <p>
-                Conformément au RGPD, vous disposez des droits suivants : accès, rectification,
-                effacement (« droit à l&apos;oubli »), portabilité, opposition, limitation du traitement.
+                Conformément au RGPD, vous disposez des droits d&apos;accès, de rectification,
+                de portabilité et du{" "}
+                <Highlight>droit à l&apos;oubli (effacement complet)</Highlight>.
               </p>
               <p className="mt-2">
-                Pour exercer vos droits, contactez-nous à{" "}
-                <span className="text-[var(--elec-blue)]">privacy@academIA.fr</span>.
-                Délai de réponse : <span className="text-white">30 jours maximum</span>.
-              </p>
-              <p className="mt-2">
-                En cas de litige non résolu, vous pouvez saisir la{" "}
-                <span className="text-white">CNIL</span> (cnil.fr).
+                Pour demander la suppression immédiate de votre compte et de toutes vos statistiques
+                de jeu, vous pouvez utiliser le bouton{" "}
+                <span className="text-white">&quot;Supprimer mon compte&quot;</span>{" "}
+                dans vos paramètres, ou nous contacter à{" "}
+                <a href="mailto:privacy@academ-ia.tech" className="text-[var(--elec-blue)] hover:text-white transition-colors">
+                  privacy@academ-ia.tech
+                </a>.
               </p>
             </Article>
 
@@ -151,6 +155,8 @@ export default function ConfidentialitePage() {
             {/* Footer nav */}
             <div className="flex flex-wrap gap-3 pt-2">
               <Link href="/" className="arcade arcade-ghost text-[9px]">◀ RETOUR AU JEU</Link>
+              <Link href="/legal/cgu" className="arcade arcade-ghost text-[9px]">◆ CGU</Link>
+              <Link href="/legal/cgv" className="arcade arcade-ghost text-[9px]">◆ CGV</Link>
               <Link href="/legal/cookies" className="arcade arcade-ghost text-[9px]">◆ COOKIES</Link>
             </div>
 
