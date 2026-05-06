@@ -145,7 +145,7 @@ async function main() {
     await prisma.utilisateur.create({ 
       data: {
       email: adminEmail,
-      pseudo: 'Administrateur AcademIA',
+      name: 'Administrateur AcademIA',
       role: 'admin',
       niveau: 10,
       xp: 10000,
